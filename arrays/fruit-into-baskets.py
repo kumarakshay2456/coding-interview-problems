@@ -21,6 +21,27 @@ def totalFruit(fruits):
 
     return max_fruits
 
+def totalFruit_v2(fruits) -> int:
+        fruits_count = {}
+        fruits_type = 0
+        start = 0
+        max_fruits = 0
+        for end in range(len(fruits)):
+            if fruits[end] not in  fruits_count or fruits_count[fruits[end]] == 0:
+                fruits_count[fruits[end]]  = 1
+                fruits_type += 1
+            else:
+                fruits_count[fruits[end]] += 1
+            while fruits_type > 2:
+                fruits_count[fruits[start]] -= 1
+                if fruits_count[fruits[start]] == 0:
+                    fruits_type -= 1
+                start = start + 1
+                
+            max_fruits = max(max_fruits, end-start+1)
+
+        return max_fruits
+
 if __name__ == '__main__':
     """
     You are visiting a farm that has a single row of fruit trees arranged from left to right. 
@@ -44,3 +65,6 @@ if __name__ == '__main__':
     """
     arr = [1,2,1]
     print("Maximum Fruits ->", totalFruit(arr))
+
+    arr = [3,3,3,1,2,1,1,2,3,3,4]
+    print("Maximum Fruits ->", totalFruit_v2(arr))
