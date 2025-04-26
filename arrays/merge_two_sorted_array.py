@@ -17,6 +17,44 @@ def merge_array(arr1, arr2):
     arr1.sort()
     arr2.sort()
 
+import math
+
+def next_gap(gap):
+    if gap <= 1:
+        return 0
+    return (gap // 2) + (gap % 2)
+
+def merge_array_v2(arr1, arr2):
+    n = len(arr1)
+    m = len(arr2)
+    gap = next_gap(n + m)
+
+    while gap > 0:
+        # Comparing elements in the first array.
+        i = 0
+        while i + gap < n:
+            if arr1[i] > arr1[i + gap]:
+                arr1[i], arr1[i + gap] = arr1[i + gap], arr1[i]
+            i += 1
+
+        # Comparing elements between both arrays.
+        j = gap - n if gap > n else 0
+        while i < n and j < m:
+            if arr1[i] > arr2[j]:
+                arr1[i], arr2[j] = arr2[j], arr1[i]
+            i += 1
+            j += 1
+
+        # Comparing elements in the second array.
+        if j < m:
+            j = 0
+            while j + gap < m:
+                if arr2[j] > arr2[j + gap]:
+                    arr2[j], arr2[j + gap] = arr2[j + gap], arr2[j]
+                j += 1
+
+        gap = next_gap(gap)
+
 
 
 if __name__ == '__main__':
@@ -32,5 +70,6 @@ if __name__ == '__main__':
     print("\narr2[] = ", end="")
     for i in range(m):
         print(arr2[i], end=" ")
+    merge_array_v2(arr1, arr2)
     print()
     
