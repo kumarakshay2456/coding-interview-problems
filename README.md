@@ -95,7 +95,3 @@ If you’d like to add new problems, improve solutions, or enhance documentation
   
 
 If you find this repository helpful, give it a ⭐️! It motivates me to add more content.
-
-  
----
-
