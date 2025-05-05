@@ -12,6 +12,23 @@ def two_sum_problem(arr, target):
         else:
             start =  start + 1
 
+def three_sum_problem(arr, target):
+    length = len(arr)
+    end = length - 1
+    for i in range(length - 2):
+        start = i + 1
+        while start < end:
+            current_sum = arr[i] + arr[start] + arr[end]
+            if current_sum == target:
+                return i+1, start+1, end+1
+            if arr[start] > (current_sum - arr[start]):
+                end = end - 1
+            else:
+                start = start + 1
+    return 0,0,0
+
+
+
     
 if __name__ == '__main__':
     """
@@ -45,4 +62,8 @@ if __name__ == '__main__':
     arr = [5,25,75]
     target = 100
     print(two_sum_problem(arr, target))
+
+    arr = [1, 2, 4, 5, 12]
+    target = 21
+    print(three_sum_problem(arr, target))
 
