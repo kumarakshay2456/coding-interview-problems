@@ -14,5 +14,7 @@ def rob(nums):
     
     return prev1
 
-nums = [1,2,3,1]
-print("Rob is", rob(nums))
+
+if __name__ == '__main__':
+    nums = [1,2,3,1]
+    print("Rob is", rob(nums))
