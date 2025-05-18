@@ -14,9 +14,17 @@ def convert_word_to_camel(key):
 
 def convert_camel_case(data):
     if type(data) == dict:
-        return {convert_word_to_camel(key): convert_camel_case(value) for key , value in data.items()}
+        value_data = {}
+        for key , value in data.items():
+            value_data[convert_word_to_camel(key)] = convert_camel_case(value)
+        return value_data
+        # return {convert_word_to_camel(key): convert_camel_case(value) for key , value in data.items()}
     elif type(data) == list:
-        return [convert_camel_case(data_array) for data_array in data]
+        list_data = []
+        for data_array in data:
+            list_data.append(convert_camel_case(data_array))
+        return list_data
+        # return [convert_camel_case(data_array) for data_array in data]
     else:
         return data
 
