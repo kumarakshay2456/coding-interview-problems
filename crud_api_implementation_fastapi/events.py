@@ -1,53 +1,40 @@
 from fastapi import FastAPI, HTTPException
+from typing import Dict
+from fastapi.responses import JSONResponse, Response
+from fastapi import status
 from pydantic import BaseModel
-from typing import Optional, List
+import uuid
+from datetime import date, datetime
 
 app = FastAPI()
 
-# Pydantic model
-class Item(BaseModel):
-    id: int
+
+# data bases
+EVENT = {}
+TICKET_DATA = {}
+USER_DATA = {}
+
+
+
+class EventData(BaseModel):
     name: str
-    description: Optional[str] = None
+    description: str
+    date: date
+    capacity: int
+    venue: str
 
-# In-memory "database"
-items_db: List[Item] = []
 
-# Create
-@app.post("/items/", response_model=Item)
-def create_item(item: Item):
-    for existing_item in items_db:
-        if existing_item.id == item.id:
-            raise HTTPException(status_code=400, detail="Item with this ID already exists")
-    items_db.append(item)
-    return item
+@app.get("/")
+def read_root():
+    return {"hello": "world"}
 
-# Read all
-@app.get("/items/", response_model=List[Item])
-def get_items():
-    return items_db
 
-# Read one
-@app.get("/items/{item_id}", response_model=Item)
-def get_item(item_id: int):
-    for item in items_db:
-        if item.id == item_id:
-            return item
-    raise HTTPException(status_code=404, detail="Item not found")
-
-# Update
-@app.put("/items/{item_id}", response_model=Item)
-def update_item(item_id: int, updated_item: Item):
-    for index, item in enumerate(items_db):
-        if item.id == item_id:
-            items_db[index] = updated_item
-            return updated_item
-    raise HTTPException(status_code=404, detail="Item not found")
-
-# Delete
-@app.delete("/items/{item_id}", response_model=Item)
-def delete_item(item_id: int):
-    for index, item in enumerate(items_db):
-        if item.id == item_id:
-            return items_db.pop(index)
-    raise HTTPException(status_code=404, detail="Item not found")
+@app.post("/events")
+def add_event(request_body: EventData):
+    event_id = uuid.uuid4()
+    data = {"id": str(event_id), "name": request_body.name, "description": request_body.description, "date": request_body.date, 
+            "capacity": request_body.capacity, "venue": request_body.venue}
+    data['created_at'] = datetime.now()
+    EVENT[str(event_id)] = data
+    
+    return Response(content="Created" , status_code=status.HTTP_201_CREATED)
