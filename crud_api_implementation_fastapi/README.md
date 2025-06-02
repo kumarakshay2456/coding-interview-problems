@@ -19,7 +19,9 @@ A simple in-memory Event Ticketing backend built using **FastAPI**. This API sup
 - ✅ In-memory data persistence
 - ✅ Input validation with Pydantic
 
+
 ---
+
 
 ## 📦 Technologies Used
 
