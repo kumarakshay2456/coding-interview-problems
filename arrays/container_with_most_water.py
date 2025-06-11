@@ -37,6 +37,13 @@ if __name__ == '__main__':
     Explanation: The above vertical lines are represented by array [1,8,6,2,5,4,8,3,7].
     In this case, the max area of water (blue section) the container can contain is 49
 
+    Sol - Summary -
+    
+	•	Use two pointers.
+	•	Calculate area between them.
+	•	Move the pointer pointing to the shorter line.
+	•	Keep track of the maximum area found.    
+
     """
     arr = [1,8,6,2,5,4,8,3,7]
     print("Max area is", find_container_with_most_water(arr))

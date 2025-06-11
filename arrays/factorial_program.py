@@ -9,7 +9,21 @@ def fact_without_recursion(n=int):
         number = number * i
     return number
 
+factorial_cache = {}
+
+def fact_dp(n):
+    if n in factorial_cache:
+        return factorial_cache[n]
+    
+    if n == 0 or n == 1:
+        factorial_cache[n] = 1
+    else:
+        factorial_cache[n] = n * fact_dp(n - 1)
+    
+    return factorial_cache[n]
+
     
 if __name__  == '__main__':
     print("With Recrusion -> ", fact(10))
     print("Without Recrusion -> ", fact_without_recursion(10)) 
+    print("factorial using the DP Recrusion -> ", fact_dp(10)) 

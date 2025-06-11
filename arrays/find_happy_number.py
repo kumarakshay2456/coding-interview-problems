@@ -42,6 +42,26 @@ def is_happy_number_v2(num:int):
     
 
 if __name__ == '__main__':
+    """
+    Approach 1: Using a Dictionary to Track Seen Numbers (Cycle Detection via Hashing)
+
+    🔄 Logic
+        •	Keep computing the square sum of digits.
+        •	Use a dictionary or set to store previously seen results.
+        •	If a result repeats → there’s a cycle → return False.
+        •	If it becomes 1 → it’s a Happy Number.
+
+    Approach 2: Fast and Slow Pointer (Floyd’s Cycle Detection)
+
+    🐢🐇 Logic
+        •	Similar to cycle detection in linked lists.
+        •	Use two pointers:
+        •	slow moves one step
+        •	fast moves two steps
+        •	If they meet at 1 → happy number.
+        •	If they meet elsewhere → cycle → not a happy number.
+    
+    """
     print("SQUIRE NUMBER", is_happy_number(4))
         
 

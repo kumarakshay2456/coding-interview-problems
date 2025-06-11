@@ -29,6 +29,20 @@ def convert_camel_case(data):
         return data
 
 
+"""
+Summary -
+
+Recursively walks through:
+	•	dict: converts all keys using convert_word_to_camel
+	•	list: applies same function on each item
+	•	other types: returned as-is
+
+✅ Best Practices
+	•	Use recursion for nested structures
+	•	Consider memoization if processing large trees repeatedly
+	•	Make it robust to handle None, non-string keys if needed in the future
+
+"""
 print(convert_camel_case(data))
 
 

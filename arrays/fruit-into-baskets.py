@@ -62,6 +62,13 @@ if __name__ == '__main__':
     Explanation: We can pick from all 3 trees.
 
     
+    Summary - 
+
+        1. Sliding Window -> Expand right to include more fruits
+        2. HashMap (dictionary) -> Keep count of fruit types in the window
+        3. Shrink When > 2 types -> Move left pointer and update the basket
+        4. Goal -> Max size of a valid window (with â‰¤ 2 fruit types)
+
     """
     arr = [1,2,1]
     print("Maximum Fruits ->", totalFruit(arr))
