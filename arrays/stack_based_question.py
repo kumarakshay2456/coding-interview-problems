@@ -78,29 +78,40 @@ def remove_parentheses(expr):
         elif char == '-':
             sign = -1
         elif char == '(':
-            # Determine the new context and push it to the stack
-            if i > 0 and expr[i - 1] == '-':
+            # Check operator before '('
+            prev = expr[i - 1] if i > 0 else ''
+            if prev == '-':
                 sign_stack.append(sign_stack[-1] * -1)
+            elif prev == '+':
+                sign_stack.append(sign_stack[-1])
+            elif prev in '*/':
+                # preserve parenthesis in * or / cases
+                result.append(prev)
+                result.append('(')
+                sign_stack.append(sign_stack[-1])
             else:
                 sign_stack.append(sign_stack[-1])
-            sign = 1  # Reset the current sign after entering '('
         elif char == ')':
+            prev = expr[i - 1] if i > 0 else ''
+            if len(result) >= 2 and result[-1] != ')' and result[-2] in '*/(':
+                result.append(')')
             sign_stack.pop()
         elif char in '*/':
-            result.append(char)
+            # handled already above if it was before '('
+            if i + 1 < len(expr) and expr[i + 1] == '(':
+                pass  # defer
+            else:
+                result.append(char)
         elif char.isalnum():
-            # Prepend sign if needed
             if result and result[-1] not in '(*+-/':
-                # Add explicit '+' if needed
                 if sign_stack[-1] * sign == 1:
                     result.append('+')
                 else:
                     result.append('-')
             elif not result and sign_stack[-1] * sign == -1:
                 result.append('-')
-
             result.append(char)
-            sign = 1  # reset after applying
+            sign = 1
         i += 1
 
     return ''.join(result)
@@ -116,7 +127,7 @@ if __name__ == '__main__':
     # string = "(a-(b+c)+d)"
     # print(f"Correct string is -  3 {string} -> {remove_parentheses(string)}")
 
-    string = "a-(b-(c+d))"
+    string = "p*(x+y)"
     remove_parentheses(string)
     print(f"Correct string is -  4 {string} expected = a-b+c+d  -> {remove_parentheses(string)}")
 #   Expected: a-b+c+d (or similar depending on rule)
