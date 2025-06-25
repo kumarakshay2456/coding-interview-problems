@@ -20,6 +20,30 @@ def maximum_sub_array(arr, k):
     print("Maximum Sum is:", max_sum)
     return max_subarray, max_sum
 
+
+def longest_subarray_with_sum_k(arr, k):
+    """
+    Longest subarray with sum exactly equal to k
+    """
+
+    prefix_sum = 0
+    max_len = 0
+    prefix_map = {}
+
+    for i in range(len(arr)):
+        prefix_sum += arr[i]
+
+        if prefix_sum == k:
+            max_len = i + 1
+
+        if (prefix_sum - k) in prefix_map:
+            max_len = max(max_len, i - prefix_map[prefix_sum - k])
+
+        if prefix_sum not in prefix_map:
+            prefix_map[prefix_sum] = i
+
+    return max_len
+
 if __name__ == '__main__':
     """
     Maximum Sum Subarray of Size K:
@@ -31,5 +55,8 @@ if __name__ == '__main__':
     arr = [2,3,5,6,8,9,12,1,2,3,9]
     k = 3
     print(maximum_sub_array(arr, k))
+
+    
+    longest_subarray_with_sum_k()
 
 
