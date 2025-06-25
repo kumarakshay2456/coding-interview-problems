@@ -32,6 +32,19 @@ if __name__ == '__main__':
      LCA(5, 1) = 3
      LCA(6, 4) = 5
      LCA(7,8) = 3
+
+     find_lca(3)
+        ├── find_lca(5)
+        │    ├── find_lca(6) → returns 6
+        │    └── find_lca(2)
+        │         ├── find_lca(7) → None
+        │         └── find_lca(4) → returns 4
+        │    ⇒ both left & right found → return 5
+        └── find_lca(1)
+            ├── find_lca(0) → None
+            └── find_lca(8) → None
+      
+      ⇒ only left side gave result → return 5
     
     """
     root = Node(3)
