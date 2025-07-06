@@ -11,6 +11,7 @@ Yes! In stock buy and sell problems, there are several variations that are commo
 	•	Pattern: Greedy / Single Pass
 	•	Solution: Track the minimum price so far and max profit.
 
+```python
 def max_profit(prices):
     min_price = float('inf')
     max_profit = 0
@@ -18,6 +19,7 @@ def max_profit(prices):
         min_price = min(min_price, price)
         max_profit = max(max_profit, price - min_price)
     return max_profit
+```
 
 
 
@@ -28,22 +30,24 @@ def max_profit(prices):
 	•	Pattern: Greedy
 	•	Solution: Add every price increase to profit.
 
+```python
 def max_profit(prices):
     profit = 0
     for i in range(1, len(prices)):
         if prices[i] > prices[i - 1]:
             profit += prices[i] - prices[i - 1]
     return profit
+```
 
 
 
-⸻
 
 ✅ 3. Best Time to Buy and Sell Stock III (At Most Two Transactions)
 	•	Problem: You may complete at most two transactions.
 	•	Pattern: Dynamic Programming (DP)
 	•	Solution: Use two passes with profit tracking.
 
+```python
 def max_profit(prices):
     n = len(prices)
     left_profits = [0]*n
@@ -60,16 +64,15 @@ def max_profit(prices):
         right_profits[i] = max(right_profits[i+1], max_price - prices[i])
     
     return max(left + right for left, right in zip(left_profits, right_profits))
+```
 
-
-
-⸻
 
 ✅ 4. Best Time to Buy and Sell Stock IV (At Most k Transactions)
 	•	Problem: You may complete at most k transactions.
 	•	Pattern: DP with Transaction State
 	•	Solution: Use 2D DP table: dp[k+1][n]
 
+```python
 def max_profit(k, prices):
     if not prices or k == 0:
         return 0
@@ -85,9 +88,10 @@ def max_profit(k, prices):
             max_diff = max(max_diff, dp[t-1][d] - prices[d])
     return dp[k][-1]
 
+```
 
 
-⸻
+
 
 ✅ 5. Best Time to Buy and Sell Stock with Cooldown
 	•	Problem: After you sell a stock, you cannot buy stock on the next day (1 day cooldown).
@@ -97,6 +101,7 @@ def max_profit(k, prices):
 	•	sold: Max profit if just sold a stock
 	•	rest: Max profit if in cooldown or resting
 
+```python
 def max_profit(prices):
     if not prices:
         return 0
@@ -109,7 +114,7 @@ def max_profit(prices):
         rest = max(rest, prev_sold)
     return max(sold, rest)
 
-
+```
 
 ⸻
 
@@ -120,6 +125,7 @@ def max_profit(prices):
 	•	cash: max profit without holding stock
 	•	hold: max profit with holding stock
 
+```python
 def max_profit(prices, fee):
     cash, hold = 0, -prices[0]
     for price in prices[1:]:
@@ -127,13 +133,14 @@ def max_profit(prices, fee):
         hold = max(hold, cash - price)
     return cash
 
+```
 
 
 ⸻
 
 🧠 Summary Table
-
-    Problem Variant	Max Transactions	Fee	Cooldown	Pattern Used	Time Complexity
+```
+Problem Variant	   Max Transactions	 Fee	Cooldown	Pattern Used	Time Complexity
  1.   I	                1	 	               No	   Greedy	            O(n)
  2.   II	Unlimited	No	No	Greedy	O(n)
  3.   III	2	No	No	DP (2-pass)	O(n)
@@ -141,6 +148,7 @@ def max_profit(prices, fee):
  5.   Cooldown	Unlimited	No	Yes	DP	O(n)
  6.   With Fee	Unlimited	Yes	No	DP	O(n)
 
+```
 
 
 ⸻
