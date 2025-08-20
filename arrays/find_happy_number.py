@@ -43,6 +43,28 @@ def is_happy_number_v2(num:int):
 
 if __name__ == '__main__':
     """
+    Problem - Determine whether a given number is a Happy Number.”
+    
+    A happy number is defined as follows:
+
+	•	Start with any positive integer.
+	•	Replace the number by the sum of the squares of its digits.
+	•	Repeat the process until the number becomes 1 (where it will stay),
+        or it loops endlessly in a cycle that does not include 1.
+
+    A number is considered happy if this process eventually results in 1.
+    If it falls into a cycle without reaching 1, it is considered unhappy.
+
+    Examples
+
+        •	Input: 19
+    Process:
+        •	1² + 9² = 82
+        •	8² + 2² = 68
+        •	6² + 8² = 100
+        •	1² + 0² + 0² = 1
+    Output: True → 19 is a happy number
+
     Approach 1: Using a Dictionary to Track Seen Numbers (Cycle Detection via Hashing)
 
     🔄 Logic
