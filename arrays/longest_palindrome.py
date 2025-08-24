@@ -16,4 +16,34 @@ def longestPalindrome(s: str) -> int:
     return max_palin
 
 
+
+"""
+Given a string s, return the length of the longest palindrome that can be built with the letters of s.
+
+Letters are case-sensitive, so "Aa" is not the same as "aa"
+
+Ex - s = "abccccdd"
+Output - 7
+
+
+Ex2 - s = "bananas"
+Output - 5
+
+
+"""
 print("Value is -> ",longestPalindrome("bananas"))
+
+def get_longest_palindrome(s)->int:
+    string_dict = Counter(s)
+    longest_palin = 0
+    is_odd = False
+    for value in string_dict.values():
+        if value % 2 == 0:
+            longest_palin += value
+        else:
+            longest_palin += (value - 1)
+            is_odd = True
+    return longest_palin + 1 if is_odd else longest_palin
+
+print("Longest palindrome v2 -> ", get_longest_palindrome("abccccdd"))
+
