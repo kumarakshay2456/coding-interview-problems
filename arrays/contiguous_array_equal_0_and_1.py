@@ -11,3 +11,17 @@ for i , num in enumerate(nums):
         first_occurrence[prefix_sum] = i
 print("max length", max_len)
 
+""""
+Given a binary array nums, find the length of the longest contiguous subarray with equal number of 0s and 1s.
+
+Soln - 
+	•	It loops through a binary array nums of 0s and 1s.
+	•	Maintains a prefix_sum, where:
+	•	+1 for a 1
+	•	-1 for a 0
+	•	Uses a hashmap first_occurrence to store the first index where each prefix_sum appeared.
+	•	If the same prefix_sum appears again at index i, it means the subarray between those two indices has equal number of 0s and 1s.
+	•	It keeps track of the maximum such subarray length (max_len).
+
+"""
+

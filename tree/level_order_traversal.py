@@ -29,8 +29,6 @@ def level_order_traversal(root):
 
 
 
-
-
 if __name__ == '__main__':
     p = Tree(2)
     p.left = Tree(3)
