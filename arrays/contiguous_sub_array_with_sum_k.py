@@ -18,6 +18,12 @@ def subarraySum(nums, k):
 """
 Given an integer array nums and an integer k, return the total number of subarrays whose sum equals k.
 
+Input: nums = [1, 2, 3], k = 3
+Output: 2
+
+Input: nums = [3, 4, 7, 2, -3, 1, 4, 2], k = 7
+Output: 4
+
 We use prefix sums just like in the contiguous array problem:
 
 	•	Let prefix_sum[i] = sum of elements from nums[0..i].
@@ -36,5 +42,12 @@ We use prefix sums just like in the contiguous array problem:
 
 
     So we can store counts of prefix sums in a hashmap.
+
+    Think like this:
+
+    “I’m at current sum = X
+    Have I seen a previous sum = X - k?”
+
+    If yes → 🎉 found a subarray
 
 """

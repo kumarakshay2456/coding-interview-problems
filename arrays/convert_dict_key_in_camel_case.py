@@ -1,5 +1,5 @@
 data = {
-    "first_name": "akshay",
+    "first_name": "akshay_Kumar",
     "department_details": {"section_name": "c", "capacity_values": {"test": 1}},
     "more_details": [{"c_s": 1}, {"is": 2}]
 }
@@ -30,8 +30,42 @@ def convert_camel_case(data):
 
 
 """
-Summary -
+Problem -
+You are given a nested data structure (a mix of dictionaries and lists) where all dictionary keys are in snake_case.
 
+Your task is to convert all keys into camelCase, while preserving:
+
+* The original structure (nested dictionaries & lists)
+* The values (unchanged)
+
+example -> 
+data = {
+    "first_name": "akshay",
+    "department_details": {
+        "section_name": "c",
+        "capacity_values": {"test": 1}
+    },
+    "more_details": [
+        {"c_s": 1},
+        {"is": 2}
+    ]
+}
+
+Soln - 
+{
+    "firstName": "akshay",
+    "departmentDetails": {
+        "sectionName": "c",
+        "capacityValues": {"test": 1}
+    },
+    "moreDetails": [
+        {"cS": 1},
+        {"is": 2}
+    ]
+}
+
+
+Summary -
 Recursively walks through:
 	•	dict: converts all keys using convert_word_to_camel
 	•	list: applies same function on each item

@@ -14,7 +14,32 @@ print("max length", max_len)
 """"
 Given a binary array nums, find the length of the longest contiguous subarray with equal number of 0s and 1s.
 
+Example 1:
+Input: nums = [0, 1]
+Output: 2
+Explanation:
+The entire array has 1 zero and 1 one → equal count.
+
+Example 2:
+Input: nums = [0, 0, 1, 0, 0, 0, 1, 1]
+Output: 6
+Explanation:
+The subarray [1, 0, 0, 0, 1, 1] (index 2 to 7) has:
+3 zeros and 3 ones → equal count.
+
 Soln - 
+Brute Force Approch :
+1. Pick a starting index i
+2. For every ending index j ≥ i:
+    * Count number of 0s and 1s in subarray nums[i...j]
+    * If they are equal → update max_len
+    
+* Time: O(n²)
+    (All subarrays)
+* Space: O(1)
+    
+Optimized Approch:    
+
 	•	It loops through a binary array nums of 0s and 1s.
 	•	Maintains a prefix_sum, where:
 	•	+1 for a 1
