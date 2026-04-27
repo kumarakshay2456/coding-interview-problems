@@ -30,6 +30,14 @@ Ex2 - s = "bananas"
 Output - 5
 
 
+Strategy
+
+* Count frequency of each character
+* For each character:
+    * If count is even → use all
+    * If count is odd → use count - 1
+* If any odd exists → we can place 1 character in center
+
 """
 print("Value is -> ",longestPalindrome("bananas"))
 
