@@ -1,0 +1,15 @@
+{
+  "meta": {
+    "version": "1.0",
+    "totalDays": 60,
+    "author": "Akshay Kumar"
+  },
+  "progress": {
+    "startDate": null,
+    "streak": 0,
+    "longestStreak": 0,
+    "lastActiveDate": null,
+    "solvedProblems": [],
+    "dayNotes": {}
+  }
+}
