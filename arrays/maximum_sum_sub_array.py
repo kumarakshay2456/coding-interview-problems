@@ -1,4 +1,18 @@
-def maximum_sub_array(arr, k):
+def maximum_sum_sub_array(arr, k):
+    """
+    Problem Statement
+
+    Given an array of integers arr and a positive integer k, find the contiguous subarray of size k that has the maximum sum.
+    Return both the subarray and its sum
+    Input:
+    arr = [2, 3, 5, 6, 8, 9, 12, 1, 2, 3, 9]
+    k = 3
+
+    Output:
+    Subarray = [8, 9, 12]
+    Sum = 29
+    
+    """
     if k > len(arr):
         return "Subarray size k is greater than array length"
     
@@ -23,7 +37,19 @@ def maximum_sub_array(arr, k):
 
 def longest_subarray_with_sum_k(arr, k):
     """
-    Longest subarray with sum exactly equal to k
+    Problem Statement
+
+    Given an array of integers arr and an integer k, find the length of the longest contiguous subarray whose sum is exactly equal to k.
+    Input:
+    arr = [1, 2, 3, 1, 1, 1, 1]
+    k = 3
+    Output: 3
+
+    Input:
+    arr = [2, -1, 2, 3, -2, 4]
+    k = 4
+    Output: 4
+
     """
 
     prefix_sum = 0
@@ -54,7 +80,7 @@ if __name__ == '__main__':
 
     arr = [2,3,5,6,8,9,12,1,2,3,9]
     k = 3
-    print(maximum_sub_array(arr, k))
+    print(maximum_sum_sub_array(arr, k))
 
     
     longest_subarray_with_sum_k()
