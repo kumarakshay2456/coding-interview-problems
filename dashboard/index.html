@@ -1499,6 +1499,128 @@ def sieve(n):
 }
 
 // ═══════════════════════════════════════════════════════════
+// DATA BACKUP — EXPORT / IMPORT / FRESH START
+// ═══════════════════════════════════════════════════════════
+
+function fmtDateTime(iso) {
+  if (!iso) return 'Never';
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    + ' at ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+}
+
+function exportProgress() {
+  const payload = { ...state, exportedAt: new Date().toISOString(), version: '2.0' };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `dsa-progress-${todayStr()}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  state.lastExport = new Date().toISOString();
+  saveState();
+  renderDataBackup();
+  showToast('✅ Progress exported! Keep this file as your backup.');
+}
+
+function importProgress() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        if (!Array.isArray(data.solved)) throw new Error('Invalid format');
+        state.startDate    = data.startDate    ?? state.startDate;
+        state.solved       = data.solved       ?? [];
+        state.streak       = data.streak       ?? 0;
+        state.longestStreak= data.longestStreak?? 0;
+        state.lastActive   = data.lastActive   ?? null;
+        state.lastImport   = new Date().toISOString();
+        saveState();
+        updateStreakPill();
+        renderDashboard();
+        showToast('✅ Progress imported! ' + data.solved.length + ' problems restored.');
+      } catch {
+        showToast('❌ Invalid file — please use an exported DSA progress file.');
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function freshStart() {
+  const confirmed = window.confirm(
+    '⚠️ Fresh Start will erase ALL your progress — solved problems, streak, and start date.\n\nThis cannot be undone. Export your data first if you want a backup.\n\nAre you sure?'
+  );
+  if (!confirmed) return;
+  state = { startDate: null, solved: [], lastActive: null, streak: 0, longestStreak: 0, lastExport: state.lastExport, lastImport: null };
+  saveState();
+  updateStreakPill();
+  renderDashboard();
+  document.getElementById('onboard').style.display = 'flex';
+  document.getElementById('startDateInput').value = todayStr();
+  showToast('🔄 All progress cleared. Set your new start date!');
+}
+
+function renderDataBackup() {
+  const el = document.getElementById('dataBackup');
+  if (!el) return;
+  const solvedCount_ = state.solved.length;
+  const total = PROBLEMS.length;
+  const pct = Math.round(solvedCount_ / total * 100);
+
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+      <div>
+        <div class="label-sm" style="margin-bottom:4px">💾 Data & Backup</div>
+        <div style="font-size:13px;color:var(--muted2)">
+          Your progress is saved in this browser's local storage.
+          <b style="color:var(--text)">Closing the browser keeps your data safe.</b>
+          Clearing browser cache or switching devices will lose it — export regularly as a backup.
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;flex-shrink:0">
+        <button class="btn btn-ghost btn-sm" onclick="exportProgress()" title="Download your progress as a JSON backup file">
+          ⬇️ Export Progress
+        </button>
+        <button class="btn btn-ghost btn-sm" onclick="importProgress()" title="Restore progress from a previously exported file">
+          ⬆️ Import Progress
+        </button>
+        <button class="btn btn-sm" style="background:rgba(248,113,113,.1);color:#f87171;border:1px solid rgba(248,113,113,.3)" onclick="freshStart()" title="Erase all progress and start over">
+          🗑️ Fresh Start
+        </button>
+      </div>
+    </div>
+    <div style="margin-top:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+      <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:9px;padding:12px 14px">
+        <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Snapshot</div>
+        <div style="font-size:13px;font-weight:700;color:var(--text)">${solvedCount_} / ${total} solved</div>
+        <div style="font-size:11px;color:var(--muted2);margin-top:2px">${pct}% complete · Streak ${state.streak || 0} days</div>
+      </div>
+      <div style="background:rgba(52,211,153,.05);border:1px solid rgba(52,211,153,.15);border-radius:9px;padding:12px 14px">
+        <div style="font-size:11px;color:#34d399;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Last Export</div>
+        <div style="font-size:12px;font-weight:600;color:var(--text)">${fmtDateTime(state.lastExport)}</div>
+        <div style="font-size:11px;color:var(--muted2);margin-top:2px">${state.lastExport ? 'File saved to your downloads' : 'No backup made yet — export now!'}</div>
+      </div>
+      <div style="background:rgba(129,140,248,.05);border:1px solid rgba(129,140,248,.15);border-radius:9px;padding:12px 14px">
+        <div style="font-size:11px;color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Last Import</div>
+        <div style="font-size:12px;font-weight:600;color:var(--text)">${fmtDateTime(state.lastImport)}</div>
+        <div style="font-size:11px;color:var(--muted2);margin-top:2px">${state.lastImport ? 'Progress restored from file' : 'No import done yet'}</div>
+      </div>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════════════════
 // CHATGPT INTEGRATION
 // ═══════════════════════════════════════════════════════════
 const GPT_SVG = `<svg width="13" height="13" viewBox="0 0 41 41" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M37.532 16.87a9.963 9.963 0 0 0-.856-8.184 10.078 10.078 0 0 0-10.855-4.835 9.964 9.964 0 0 0-6.542-2.634 10.079 10.079 0 0 0-9.617 6.977 9.967 9.967 0 0 0-6.67 4.834 10.08 10.08 0 0 0 1.24 11.817 9.965 9.965 0 0 0 .856 8.185 10.079 10.079 0 0 0 10.855 4.835 9.965 9.965 0 0 0 6.542 2.634 10.079 10.079 0 0 0 9.617-6.977 9.967 9.967 0 0 0 6.67-4.834 10.079 10.079 0 0 0-1.24-11.817zm-14.233 7.601-4.472 2.582-4.472-2.582v-5.163l4.472-2.582 4.472 2.582z" fill="currentColor"/></svg>`;
