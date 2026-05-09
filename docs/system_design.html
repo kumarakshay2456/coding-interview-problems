@@ -25,6 +25,48 @@
   --lld: #818cf8;
   --hld: #34d399;
 }
+[data-theme="light"] {
+  --bg: #f1f5f9;
+  --surface: #f8fafc;
+  --card: #ffffff;
+  --card2: #eef2f7;
+  --border: #cbd5e1;
+  --accent: #6366f1;
+  --accent2: #4f46e5;
+  --success: #059669;
+  --warn: #d97706;
+  --danger: #dc2626;
+  --purple: #7c3aed;
+  --text: #0f172a;
+  --muted: #64748b;
+  --muted2: #475569;
+  --lld: #6366f1;
+  --hld: #059669;
+}
+[data-theme="light"] body{background:var(--bg);color:var(--text)}
+[data-theme="light"] .nav{background:rgba(248,250,252,.96)}
+[data-theme="light"] .nav-back{color:var(--muted2);border-color:var(--border)}
+[data-theme="light"] .nav-back:hover{color:var(--text);border-color:var(--accent)}
+[data-theme="light"] .nav-tab:hover{background:rgba(99,102,241,.08);color:var(--text)}
+[data-theme="light"] .nav-tab.active{background:rgba(99,102,241,.14);color:#4f46e5}
+[data-theme="light"] .card,[data-theme="light"] .card2{box-shadow:0 1px 6px rgba(0,0,0,.09)}
+[data-theme="light"] .card-glow{background:linear-gradient(135deg,rgba(99,102,241,.08),rgba(129,140,248,.04));border-color:rgba(99,102,241,.25)}
+[data-theme="light"] .prog-wrap{background:rgba(0,0,0,.1)}
+[data-theme="light"] .sday.future{background:rgba(0,0,0,.03);border-color:rgba(0,0,0,.07)}
+[data-theme="light"] .sday:hover{box-shadow:0 8px 24px rgba(0,0,0,.12)}
+[data-theme="light"] .btn-ghost{background:rgba(0,0,0,.05);color:var(--text);border-color:var(--border)}
+[data-theme="light"] .btn-ghost:hover{background:rgba(0,0,0,.09)}
+[data-theme="light"] .btn-success{background:rgba(5,150,105,.1);color:#059669;border-color:rgba(5,150,105,.3)}
+[data-theme="light"] .reveal-box{background:rgba(0,0,0,.03);border-color:var(--border)}
+[data-theme="light"] pre.code,[data-theme="light"] pre{background:#e2e8f0;color:#1e293b;border-color:var(--border)}
+[data-theme="light"] .cs-table th{background:rgba(0,0,0,.04);color:var(--muted)}
+[data-theme="light"] .cs-table td{border-bottom-color:rgba(0,0,0,.06)}
+[data-theme="light"] .cs-table code,[data-theme="light"] code{background:rgba(99,102,241,.1);color:#4f46e5}
+[data-theme="light"] .tag{background:rgba(0,0,0,.07);color:var(--muted2)}
+[data-theme="light"] .toast{background:#fff;color:#059669;border-color:rgba(5,150,105,.5);box-shadow:0 8px 24px rgba(0,0,0,.12)}
+[data-theme="light"] input,[data-theme="light"] select,[data-theme="light"] textarea{background:#fff;color:var(--text);border-color:var(--border)}
+[data-theme="light"] .day-detail{background:var(--card2)}
+[data-theme="light"] #themeToggle{background:rgba(0,0,0,.06)}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.5}
 
@@ -232,6 +274,7 @@ pre.code{background:#0d1117;border:1px solid var(--border);border-radius:8px;pad
     <button class="nav-tab" onclick="goTab('backup',this)">💾 <span class="label">Backup</span></button>
   </div>
   <div class="streak-pill" id="streakPill">🔥 0 days</div>
+  <button id="themeToggle" onclick="toggleTheme()" title="Toggle light/dark theme" style="margin-left:8px;background:rgba(255,255,255,.07);border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:16px;line-height:1;color:var(--text);transition:all .2s">🌙</button>
 </nav>
 
 <div class="main">
@@ -1344,7 +1387,19 @@ function showToast(msg) {
 // ══════════════════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════════════════
+// ── Theme ─────────────────────────────────────────────────────────────────────
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('themeToggle').textContent = theme === 'light' ? '☀️' : '🌙';
+}
+function toggleTheme() {
+  const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  localStorage.setItem('dsa_theme', next);
+  applyTheme(next);
+}
+
 function init() {
+  applyTheme(localStorage.getItem('dsa_theme') || 'dark');
   updateStreakPill();
   renderDashboard();
   checkOnboard();
