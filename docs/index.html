@@ -74,17 +74,20 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 /* CALENDAR */
 .cal-legend{display:flex;gap:16px;align-items:center;margin-bottom:16px;font-size:12px;color:var(--muted2)}
 .cal-dot{width:12px;height:12px;border-radius:3px}
-.cal-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:5px}
-.cday{aspect-ratio:1;border-radius:5px;cursor:pointer;position:relative;transition:transform .15s;border:1px solid transparent}
-.cday:hover{transform:scale(1.25);z-index:5}
-.cday.future{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.06)}
-.cday.today{background:rgba(99,102,241,.35);border-color:#818cf8;box-shadow:0 0 10px rgba(129,140,248,.5)}
-.cday.done{background:rgba(52,211,153,.3);border-color:rgba(52,211,153,.5)}
-.cday.partial{background:rgba(251,191,36,.25);border-color:rgba(251,191,36,.4)}
-.cday.missed{background:rgba(248,113,113,.15);border-color:rgba(248,113,113,.25)}
-.cday.rest{background:rgba(167,139,250,.15);border-color:rgba(167,139,250,.3)}
-.cday-tip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#1a2236;border:1px solid var(--border);border-radius:6px;padding:5px 9px;font-size:10px;white-space:nowrap;z-index:20;pointer-events:none;opacity:0;transition:opacity .15s}
-.cday:hover .cday-tip{opacity:1}
+.cal-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+@media(max-width:900px){.cal-grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:600px){.cal-grid{grid-template-columns:repeat(2,1fr)}}
+.cday{border-radius:10px;cursor:pointer;padding:11px 10px;border:1px solid transparent;transition:all .2s;min-height:85px;display:flex;flex-direction:column;gap:3px}
+.cday:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.cday.future{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.06)}
+.cday.today{background:rgba(99,102,241,.2);border-color:#818cf8;box-shadow:0 0 16px rgba(129,140,248,.35)}
+.cday.done{background:rgba(52,211,153,.12);border-color:rgba(52,211,153,.35)}
+.cday.partial{background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.3)}
+.cday.missed{background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.2)}
+.cday.rest{background:rgba(167,139,250,.1);border-color:rgba(167,139,250,.25)}
+.cday-num{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px}
+.cday-title{font-size:11px;font-weight:600;line-height:1.35;color:var(--text);margin-top:2px}
+.cday-pat{font-size:10px;font-weight:600;color:var(--accent);margin-top:auto}
 .day-detail{margin-top:16px;background:var(--card2);border:1px solid var(--border);border-radius:var(--r);padding:20px;display:none}
 .day-detail.visible{display:block;animation:fadeIn .2s ease}
 
@@ -191,6 +194,7 @@ pre.code{background:#0d1117;border:1px solid var(--border);border-radius:8px;pad
     <button class="nav-tab" onclick="goTab('practice',this)">🎯 <span class="label">Practice</span></button>
     <button class="nav-tab" onclick="goTab('problems',this)">✅ <span class="label">Problems</span></button>
     <button class="nav-tab" onclick="goTab('cheatsheet',this)">📋 <span class="label">Cheat Sheet</span></button>
+    <a class="nav-tab" href="system_design.html" target="_blank" rel="noopener" style="text-decoration:none">🏗️ <span class="label">System Design</span></a>
   </div>
   <div class="streak-pill" id="streakPill">🔥 0 days</div>
 </nav>
@@ -912,8 +916,11 @@ function renderSchedule() {
   const grid = document.getElementById('calGrid');
   grid.innerHTML = SCHEDULE.map(([day,title,pat,probIds,theory],i)=>{
     const status = state.startDate ? getDayStatus(i) : 'future';
-    return `<div class="cday ${status}" onclick="showDayDetail(${i})" title="Day ${day}">
-      <div class="cday-tip">Day ${day}: ${title.substring(0,30)}</div>
+    const done = probIds.filter(id=>isSolved(id)).length;
+    return `<div class="cday ${status}" onclick="showDayDetail(${i})">
+      <div class="cday-num">DAY ${day}</div>
+      <div class="cday-title">${title.substring(0,28)}${title.length>28?'…':''}</div>
+      <div class="cday-pat">${probIds.length>0?`${done}/${probIds.length} solved`:pat}</div>
     </div>`;
   }).join('');
 

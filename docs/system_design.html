@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System Design Prep Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080c16;
+  --surface: #0d1117;
+  --card: #161c2a;
+  --card2: #1a2236;
+  --border: #232d42;
+  --accent: #818cf8;
+  --accent2: #6366f1;
+  --success: #34d399;
+  --warn: #fbbf24;
+  --danger: #f87171;
+  --purple: #a78bfa;
+  --text: #e2e8f0;
+  --muted: #64748b;
+  --muted2: #94a3b8;
+  --r: 12px;
+  --lld: #818cf8;
+  --hld: #34d399;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.5}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:200;height:60px;background:rgba(8,12,22,.92);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:8px}
+.logo{font-size:16px;font-weight:800;background:linear-gradient(135deg,#818cf8,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-right:4px;white-space:nowrap;text-decoration:none}
+.nav-back{font-size:12px;color:var(--muted2);text-decoration:none;padding:4px 10px;border-radius:6px;border:1px solid var(--border);white-space:nowrap;transition:all .2s;margin-right:8px}
+.nav-back:hover{color:var(--text);border-color:var(--accent);background:rgba(129,140,248,.08)}
+.nav-tabs{display:flex;gap:2px;flex:1;overflow-x:auto}
+.nav-tab{padding:7px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted2);border:none;background:none;white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:5px}
+.nav-tab:hover{color:var(--text);background:rgba(255,255,255,.06)}
+.nav-tab.active{color:var(--accent);background:rgba(129,140,248,.12)}
+.streak-pill{margin-left:auto;display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(251,191,36,.18),rgba(245,158,11,.08));border:1px solid rgba(251,191,36,.35);border-radius:100px;padding:5px 14px;font-weight:700;font-size:14px;color:#fbbf24;white-space:nowrap;cursor:default}
+
+/* MAIN */
+.main{margin-top:60px;padding:28px;max-width:1380px;margin-left:auto;margin-right:auto}
+.tab{display:none}.tab.active{display:block;animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* LAYOUT */
+.row{display:flex;gap:20px;margin-bottom:20px}
+.row>.card{flex:1}
+.col-7{flex:7!important}.col-5{flex:5!important}.col-4{flex:4!important}.col-6{flex:6!important}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:20px}
+@media(max-width:900px){.grid-4{grid-template-columns:1fr 1fr}.row{flex-direction:column}.grid-2{grid-template-columns:1fr}.grid-3{grid-template-columns:1fr}}
+@media(max-width:600px){.grid-4{grid-template-columns:1fr 1fr}.nav-tab span.label{display:none}}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:22px}
+.card-glow{background:linear-gradient(135deg,rgba(99,102,241,.1),rgba(129,140,248,.05));border-color:rgba(129,140,248,.3)}
+.card-green{background:linear-gradient(135deg,rgba(52,211,153,.08),rgba(16,185,129,.03));border-color:rgba(52,211,153,.25)}
+
+/* STAT CARDS */
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:6px}
+.stat-num{font-size:38px;font-weight:800;line-height:1}
+.stat-label{font-size:12px;color:var(--muted);font-weight:500;letter-spacing:.5px;text-transform:uppercase}
+.stat-sub{font-size:12px;color:var(--muted2)}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:.3px}
+.b-lld{background:rgba(129,140,248,.15);color:#818cf8}
+.b-hld{background:rgba(52,211,153,.15);color:#34d399}
+.b-phase{background:rgba(167,139,250,.12);color:#a78bfa}
+.b-done{background:rgba(52,211,153,.12);color:#34d399}
+.b-warn{background:rgba(251,191,36,.15);color:#fbbf24}
+.b-cat{background:rgba(129,140,248,.12);color:#818cf8}
+
+/* PROGRESS */
+.prog-wrap{background:rgba(255,255,255,.07);border-radius:100px;height:6px;overflow:hidden;margin-top:8px}
+.prog-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,#6366f1,#818cf8);transition:width .7s cubic-bezier(.34,1.56,.64,1)}
+.prog-fill.green{background:linear-gradient(90deg,#059669,#34d399)}
+.prog-fill.purple{background:linear-gradient(90deg,#7c3aed,#a78bfa)}
+.prog-fill.amber{background:linear-gradient(90deg,#d97706,#fbbf24)}
+
+/* SCHEDULE GRID — 5×5 */
+.sched-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px}
+.sday{border-radius:10px;cursor:pointer;padding:12px;border:1px solid transparent;transition:all .2s;position:relative;min-height:90px;display:flex;flex-direction:column;gap:4px}
+.sday:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.sday.future{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.06)}
+.sday.today{background:rgba(99,102,241,.2);border-color:#818cf8;box-shadow:0 0 16px rgba(129,140,248,.35)}
+.sday.done{background:rgba(52,211,153,.12);border-color:rgba(52,211,153,.35)}
+.sday.partial{background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.3)}
+.sday.missed{background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.2)}
+.sday.rest{background:rgba(167,139,250,.1);border-color:rgba(167,139,250,.25)}
+.sday-num{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px}
+.sday-title{font-size:11px;font-weight:600;line-height:1.35;color:var(--text);margin-top:2px}
+.sday-phase{font-size:10px;font-weight:600;margin-top:auto}
+.day-detail{margin-top:16px;background:var(--card2);border:1px solid var(--border);border-radius:var(--r);padding:20px;display:none}
+.day-detail.visible{display:block;animation:fadeIn .2s ease}
+
+/* CAL LEGEND */
+.cal-legend{display:flex;gap:16px;align-items:center;margin-bottom:16px;font-size:12px;color:var(--muted2);flex-wrap:wrap}
+.cal-dot{width:12px;height:12px;border-radius:3px;display:inline-block;margin-right:4px;vertical-align:middle}
+
+/* TOPICS ACCORDION */
+.acc{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:10px}
+.acc-head{padding:14px 18px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;background:var(--card);transition:background .15s;user-select:none}
+.acc-head:hover{background:rgba(255,255,255,.04)}
+.acc-body{display:none;border-top:1px solid var(--border)}
+.acc-body.open{display:block}
+.acc-arrow{transition:transform .25s;color:var(--muted)}
+.acc-head.open .acc-arrow{transform:rotate(180deg)}
+
+/* TOPIC ROW */
+.topic-item{display:flex;align-items:flex-start;gap:12px;padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.03);transition:background .15s}
+.topic-item:last-child{border-bottom:none}
+.topic-item:hover{background:rgba(255,255,255,.02)}
+.chk{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;cursor:pointer;margin-top:2px}
+.chk.done{background:#34d399;border-color:#34d399}
+.chk.done::after{content:'✓';font-size:11px;color:#fff;font-weight:700}
+.topic-info{flex:1;min-width:0}
+.topic-name{font-size:14px;font-weight:600}
+.topic-name.done{text-decoration:line-through;color:var(--muted)}
+.topic-meta{display:flex;gap:6px;margin-top:5px;flex-wrap:wrap;align-items:center}
+.kp-list{margin-top:8px;display:flex;gap:5px;flex-wrap:wrap}
+.kp{display:inline-block;background:rgba(255,255,255,.06);color:var(--muted2);font-size:11px;padding:3px 9px;border-radius:100px}
+.theory-box{margin-top:10px;padding:12px;background:rgba(255,255,255,.03);border-radius:8px;border-left:3px solid var(--accent);font-size:13px;color:var(--muted2);line-height:1.6;display:none}
+.theory-box.show{display:block;animation:fadeIn .2s ease}
+.prob-file{font-size:11px;color:var(--accent);font-family:'JetBrains Mono',monospace;text-decoration:none;border-bottom:1px dashed rgba(129,140,248,.4);transition:color .15s,border-color .15s}
+.prob-file:hover{color:#c084fc;border-color:#c084fc}
+
+/* BUTTONS */
+.btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .2s;display:inline-flex;align-items:center;gap:7px}
+.btn-primary{background:linear-gradient(135deg,#6366f1,#818cf8);color:#fff}
+.btn-primary:hover{opacity:.9;transform:translateY(-1px);box-shadow:0 8px 24px rgba(99,102,241,.4)}
+.btn-ghost{background:rgba(255,255,255,.06);color:var(--text);border:1px solid var(--border)}
+.btn-ghost:hover{background:rgba(255,255,255,.1)}
+.btn-success{background:rgba(52,211,153,.12);color:#34d399;border:1px solid rgba(52,211,153,.3)}
+.btn-success:hover{background:rgba(52,211,153,.22)}
+.btn-danger{background:rgba(248,113,113,.1);color:#f87171;border:1px solid rgba(248,113,113,.3)}
+.btn-danger:hover{background:rgba(248,113,113,.2)}
+.btn-sm{padding:5px 11px;font-size:12px}
+.btn-xs{padding:3px 8px;font-size:11px;border-radius:6px}
+.btn-lg{padding:14px 28px;font-size:15px;border-radius:10px}
+
+/* ChatGPT button */
+.btn-chatgpt{background:linear-gradient(135deg,rgba(16,163,127,.18),rgba(16,163,127,.08));color:#10a37f;border:1px solid rgba(16,163,127,.4);font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-weight:600;white-space:nowrap;transition:all .2s;flex-shrink:0}
+.btn-chatgpt:hover{background:rgba(16,163,127,.28);border-color:rgba(16,163,127,.7);transform:translateY(-1px)}
+.btn-reveal{background:rgba(255,255,255,.05);color:var(--muted2);border:1px solid var(--border);font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;font-weight:600;transition:all .2s}
+.btn-reveal:hover{background:rgba(255,255,255,.1);color:var(--text)}
+
+/* FILTERS */
+select,input[type="date"],input[type="text"]{background:var(--card);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;cursor:pointer;outline:none;font-family:inherit}
+select:focus,input:focus{border-color:var(--accent)}
+.filter-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;align-items:center}
+
+/* SECTION LABELS */
+.sec-title{font-size:18px;font-weight:700;margin-bottom:4px}
+.sec-sub{font-size:13px;color:var(--muted2);margin-bottom:20px}
+.label-sm{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.phase-header{font-size:16px;font-weight:700;margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+
+/* CHEAT SHEET */
+.cs-section{margin-bottom:32px}
+.cs-section h3{font-size:15px;font-weight:700;margin-bottom:14px;color:var(--accent);display:flex;align-items:center;gap:8px}
+.cs-section h3::before{content:'';display:inline-block;width:3px;height:16px;background:var(--accent);border-radius:2px}
+pre.code{background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;overflow-x:auto;color:#e2e8f0;white-space:pre}
+.cs-table{width:100%;border-collapse:collapse;font-size:13px}
+.cs-table th{text-align:left;padding:9px 12px;font-size:11px;font-weight:600;color:var(--muted);border-bottom:1px solid var(--border);background:rgba(255,255,255,.02)}
+.cs-table td{padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:top;line-height:1.5}
+.cs-table tr:last-child td{border-bottom:none}
+.cs-table tr:hover td{background:rgba(255,255,255,.02)}
+.cs-table code{font-family:'JetBrains Mono',monospace;font-size:11px;background:rgba(255,255,255,.07);padding:2px 6px;border-radius:4px}
+.cap-box{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:18px;text-align:center}
+.cap-box h4{font-size:14px;font-weight:700;margin-bottom:8px}
+.cap-box p{font-size:12px;color:var(--muted2);line-height:1.6}
+.cap-box .examples{margin-top:10px;display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
+.cap-box .examples span{font-size:11px;padding:2px 8px;border-radius:100px;border:1px solid var(--border);color:var(--muted2)}
+
+/* BACKUP */
+.bk-info-box{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:18px}
+.bk-info-box .lbl{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:6px}
+.bk-info-box .val{font-size:13px;color:var(--muted2)}
+
+/* MISC */
+.divider{height:1px;background:var(--border);margin:20px 0}
+.tag{display:inline-block;background:rgba(255,255,255,.07);color:var(--muted2);font-size:11px;padding:2px 8px;border-radius:100px;margin:2px}
+.empty{text-align:center;padding:48px 20px;color:var(--muted)}
+.empty-icon{font-size:40px;margin-bottom:12px}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* TOAST */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a2236;border:1px solid rgba(16,163,127,.5);color:#10a37f;padding:10px 22px;border-radius:100px;font-size:13px;font-weight:600;z-index:9999;opacity:0;transition:all .35s;pointer-events:none;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ONBOARDING */
+.onboard{position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center}
+.onboard-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:40px;max-width:440px;width:90%;text-align:center}
+.onboard-card h2{font-size:24px;font-weight:800;margin-bottom:8px}
+.onboard-card p{color:var(--muted2);margin-bottom:24px;font-size:14px}
+.onboard-card input{width:100%;margin-bottom:16px;text-align:center;font-size:16px}
+
+/* WEEK HEADER */
+.week-header{background:rgba(255,255,255,.03);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;margin-top:20px;border-left:3px solid var(--accent)}
+</style>
+</head>
+<body>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Onboarding Modal -->
+<div class="onboard" id="onboard" style="display:none">
+  <div class="onboard-card">
+    <div style="font-size:48px;margin-bottom:16px">🏗️</div>
+    <h2>System Design Prep</h2>
+    <p>Set your start date to begin your 25-day LLD + HLD journey. You've got this, Akshay!</p>
+    <div class="label-sm">Start Date</div>
+    <input type="date" id="startDateInput">
+    <button class="btn btn-primary btn-lg" style="width:100%;margin-top:8px" onclick="saveStartDate()">🚀 Start My Journey</button>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <a class="nav-back" href="index.html">← DSA</a>
+  <a class="logo" style="font-size:15px;cursor:default;text-decoration:none">🏗️ SD Prep</a>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="goTab('dashboard',this)">🏠 <span class="label">Dashboard</span></button>
+    <button class="nav-tab" onclick="goTab('schedule',this)">📅 <span class="label">Schedule</span></button>
+    <button class="nav-tab" onclick="goTab('topics',this)">📚 <span class="label">Topics</span></button>
+    <button class="nav-tab" onclick="goTab('cheatsheet',this)">📋 <span class="label">Cheat Sheet</span></button>
+    <button class="nav-tab" onclick="goTab('backup',this)">💾 <span class="label">Backup</span></button>
+  </div>
+  <div class="streak-pill" id="streakPill">🔥 0 days</div>
+</nav>
+
+<div class="main">
+
+<!-- ═══════════════════════════════ DASHBOARD ═══════════════════════════════ -->
+<div class="tab active" id="tab-dashboard">
+  <div class="grid-4" id="statsRow"></div>
+  <div class="row">
+    <div class="card col-7 card-glow" id="todayCard"></div>
+    <div class="card col-5" id="phaseProgress"></div>
+  </div>
+  <div class="card" id="weekPreview"></div>
+</div>
+
+<!-- ═══════════════════════════════ SCHEDULE ════════════════════════════════ -->
+<div class="tab" id="tab-schedule">
+  <div class="sec-title">25-Day System Design Plan</div>
+  <div class="sec-sub">Click any day to see details. Indigo = today · Green = done · Amber = partial · Red = missed · Purple = revision.</div>
+  <div class="card" style="margin-bottom:20px">
+    <div class="cal-legend">
+      <span><span class="cal-dot" style="background:rgba(99,102,241,.4);border:1px solid #818cf8"></span>Today</span>
+      <span><span class="cal-dot" style="background:rgba(52,211,153,.3)"></span>Done</span>
+      <span><span class="cal-dot" style="background:rgba(251,191,36,.25)"></span>Partial</span>
+      <span><span class="cal-dot" style="background:rgba(248,113,113,.15)"></span>Missed</span>
+      <span><span class="cal-dot" style="background:rgba(167,139,250,.15)"></span>Revision</span>
+      <span><span class="cal-dot" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)"></span>Upcoming</span>
+      <span style="margin-left:auto;font-size:11px"><span style="color:var(--lld)">■</span> LLD (Days 1–12) &nbsp; <span style="color:var(--hld)">■</span> HLD (Days 13–25)</span>
+    </div>
+    <div class="sched-grid" id="schedGrid"></div>
+    <div class="day-detail" id="dayDetail"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ TOPICS ══════════════════════════════════ -->
+<div class="tab" id="tab-topics">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+    <div>
+      <div class="sec-title">All 25 Topics</div>
+      <div class="sec-sub" style="margin-bottom:0">Accordion grouped by phase and week. Check off topics as you study.</div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <select id="topicFilter" onchange="renderTopics()">
+        <option value="all">All Phases</option>
+        <option value="LLD">LLD Only</option>
+        <option value="HLD">HLD Only</option>
+      </select>
+    </div>
+  </div>
+  <div id="topicsContent"></div>
+</div>
+
+<!-- ══════════════════════════════ CHEAT SHEET ══════════════════════════════ -->
+<div class="tab" id="tab-cheatsheet">
+  <div class="sec-title">System Design Cheat Sheet</div>
+  <div class="sec-sub">All the concepts you need for LLD + HLD interviews in one place. Keep this open during mock sessions.</div>
+  <div id="cheatContent"></div>
+</div>
+
+<!-- ══════════════════════════════ BACKUP ═══════════════════════════════════ -->
+<div class="tab" id="tab-backup">
+  <div class="sec-title">Backup &amp; Restore</div>
+  <div class="sec-sub">Export your progress, import from a backup, or reset for a fresh start.</div>
+  <div class="grid-3" id="backupInfoBoxes"></div>
+  <div class="row" style="margin-top:8px">
+    <div class="card col-4" style="display:flex;flex-direction:column;gap:14px">
+      <div style="font-size:15px;font-weight:700">Export Progress</div>
+      <div style="font-size:13px;color:var(--muted2)">Download your current progress as a JSON file for safekeeping.</div>
+      <button class="btn btn-primary" onclick="exportData()">⬇ Export JSON</button>
+    </div>
+    <div class="card col-4" style="display:flex;flex-direction:column;gap:14px">
+      <div style="font-size:15px;font-weight:700">Import Progress</div>
+      <div style="font-size:13px;color:var(--muted2)">Restore from a previously exported JSON backup file.</div>
+      <label class="btn btn-ghost" style="cursor:pointer">⬆ Import JSON<input type="file" accept=".json" id="importFile" style="display:none" onchange="importData(event)"></label>
+    </div>
+    <div class="card col-4" style="display:flex;flex-direction:column;gap:14px">
+      <div style="font-size:15px;font-weight:700">Fresh Start</div>
+      <div style="font-size:13px;color:var(--muted2)">Clear all progress and start over. This cannot be undone.</div>
+      <button class="btn btn-danger" onclick="freshStart()">🗑 Clear All Data</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- end main -->
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// DATA — ALL 25 TOPICS
+// ══════════════════════════════════════════════════════════════
+const TOPICS = [
+  // ── PHASE 1: LLD ──
+  // Week 1
+  {id:'lld1', day:1, name:'OOP Basics', phase:'LLD', week:'Week 1', category:'Foundations',
+   keyPoints:['Class & Object','Encapsulation','Inheritance','Polymorphism','Abstraction'],
+   theory:'Understand the 4 pillars. Encapsulation = data hiding via access modifiers (private, protected). Inheritance = IS-A relationship — reuse and extend parent class. Polymorphism = same interface, different behavior (method overriding, duck typing). Abstraction = hide implementation complexity, expose only what is needed.',
+   file:'interview_prep/lld/week1/day1_oop_basics.md'},
+
+  {id:'lld2', day:2, name:'SOLID Principles', phase:'LLD', week:'Week 1', category:'Foundations',
+   keyPoints:['SRP','OCP','LSP','ISP','DIP'],
+   theory:'SRP = Single Responsibility Principle: one class, one reason to change. OCP = Open-Closed: open for extension, closed for modification (use abstract classes). LSP = Liskov Substitution: subclass must be substitutable for base class. ISP = Interface Segregation: small focused interfaces over fat ones. DIP = Dependency Inversion: depend on abstractions, not concretions.',
+   file:'interview_prep/lld/week1/day2_solid.md'},
+
+  {id:'lld3', day:3, name:'UML Basics', phase:'LLD', week:'Week 1', category:'Foundations',
+   keyPoints:['Class Diagrams','Association','Aggregation','Composition','Inheritance Arrow','Dependency'],
+   theory:'Class diagrams show classes and relationships. Association = uses-a (arrow). Aggregation = has-a but parts can exist independently (hollow diamond). Composition = has-a but parts cannot exist without whole (filled diamond). Inheritance = is-a (hollow triangle arrow). Dependency = uses temporarily (dashed arrow). Know multiplicity: 1, 0..1, *, 1..*',
+   file:'interview_prep/lld/week1/day3_uml.md'},
+
+  {id:'lld4', day:4, name:'Python OOP Deep Dive', phase:'LLD', week:'Week 1', category:'Foundations',
+   keyPoints:['Dunder Methods','Properties','ABC','Metaclasses','Descriptors'],
+   theory:'Dunder methods: __init__, __str__, __repr__, __eq__, __hash__, __len__, __getitem__. Properties: @property + @setter for controlled attribute access. ABC = Abstract Base Classes via abc module — enforces interface contract. @abstractmethod makes subclasses implement methods. Metaclasses control class creation.',
+   file:'interview_prep/lld/week1/day4_python_oop.md'},
+
+  {id:'lld5', day:5, name:'Revision + Practice', phase:'LLD', week:'Week 1', category:'Revision',
+   keyPoints:['OOP Review','SOLID Review','Write Class Hierarchy','Mini Exercise'],
+   theory:'Build a mini class hierarchy: Animal → Dog/Cat with speak(). Apply SOLID: separate logging from business logic. Draw UML for your classes. Write from memory without looking at notes — this is the real test.',
+   file:'interview_prep/lld/week1/day5_revision.md'},
+
+  // Week 2
+  {id:'lld6', day:6, name:'Creational Patterns', phase:'LLD', week:'Week 2', category:'Design Patterns',
+   keyPoints:['Singleton','Factory Method','Abstract Factory','Builder'],
+   theory:'Singleton: one instance via class-level _instance check. Factory: creates objects without specifying exact class — use classmethod. Abstract Factory: factory of factories, returns family of related objects. Builder: step-by-step construction of complex objects — director + builder pattern. In Python, use __new__ for Singleton or module-level instance.',
+   file:'interview_prep/lld/week2/day6_creational.md'},
+
+  {id:'lld7', day:7, name:'Structural Patterns', phase:'LLD', week:'Week 2', category:'Design Patterns',
+   keyPoints:['Adapter','Decorator','Facade','Proxy','Composite'],
+   theory:'Adapter: wraps incompatible interface. Decorator: adds responsibility dynamically — Python has native @decorator syntax. Facade: single simplified interface to a complex subsystem. Proxy: placeholder that controls access — great for lazy loading, caching, auth. Composite: tree structure of objects, treat individual + groups uniformly.',
+   file:'interview_prep/lld/week2/day7_structural.md'},
+
+  {id:'lld8', day:8, name:'Behavioral Patterns', phase:'LLD', week:'Week 2', category:'Design Patterns',
+   keyPoints:['Strategy','Observer','Command','Iterator','Template Method'],
+   theory:'Strategy: encapsulate algorithms, switch at runtime — inject via constructor. Observer: publish/subscribe — subject notifies all registered observers. Command: encapsulate request as object — supports undo/redo. Iterator: sequential access without exposing internals. Template Method: skeleton algorithm in base class, steps overridden in subclasses.',
+   file:'interview_prep/lld/week2/day8_behavioral.md'},
+
+  {id:'lld9', day:9, name:'LLD Problem — Parking Lot', phase:'LLD', week:'Week 2', category:'LLD Practice',
+   keyPoints:['ParkingLot','ParkingFloor','ParkingSpot','Vehicle','Ticket','Payment'],
+   theory:'Key classes: ParkingLot (singleton), ParkingFloor[], ParkingSpot (Compact/Large/Handicapped), Vehicle (Car/Truck/Motorcycle), ParkingTicket, PaymentProcessor. Use Strategy for pricing. Use Observer to notify when spots free up. Spot assignment: scan floors → find first available matching spot type.',
+   file:'interview_prep/lld/week2/day9_parking_lot.md'},
+
+  {id:'lld10', day:10, name:'LLD Problem — Library Management', phase:'LLD', week:'Week 2', category:'LLD Practice',
+   keyPoints:['Book','BookItem','Member','Librarian','Lending','Search','Reservation'],
+   theory:'Book (metadata) vs BookItem (physical copy with barcode). Member and Librarian extend Person. Lending tracks checkout/due dates. Search supports by title/author/ISBN — use Strategy. Reservation queue when all copies checked out. Fine calculation on late return. Use Observer to notify reserved members when book returned.',
+   file:'interview_prep/lld/week2/day10_library.md'},
+
+  {id:'lld11', day:11, name:'LLD Problem — Elevator System', phase:'LLD', week:'Week 2', category:'LLD Practice',
+   keyPoints:['ElevatorCar','ElevatorController','Button','Direction','SCAN Algorithm','State Machine'],
+   theory:'ElevatorCar has state: IDLE/MOVING_UP/MOVING_DOWN. ElevatorController dispatches requests. Use SCAN (elevator) algorithm: serve requests in current direction, then reverse. Button presses go to a Request queue. State machine for door open/close/moving. Multiple cars: assign nearest idle car.',
+   file:'interview_prep/lld/week2/day11_elevator.md'},
+
+  {id:'lld12', day:12, name:'LLD Mock + Q&A', phase:'LLD', week:'Week 2', category:'Revision',
+   keyPoints:['Mock Interview','Common LLD Questions','ATM System','Chess Game','Hotel Booking'],
+   theory:'Common LLD questions: Design ATM, Chess Game, Hotel Booking, Snake Game, Food Delivery. Framework: clarify requirements → identify entities (nouns) → relationships → design patterns → class diagram → write key code. Time box: 35-40 min per LLD problem. Always start with use cases.',
+   file:'interview_prep/lld/week2/day12_mock.md'},
+
+  // ── PHASE 2: HLD ──
+  // Week 3
+  {id:'hld13', day:13, name:'HLD Intro — Client-Server', phase:'HLD', week:'Week 3', category:'Foundations',
+   keyPoints:['Client-Server Model','HTTP/HTTPS','REST vs RPC','APIs','Stateless vs Stateful'],
+   theory:'Client-Server: clients request, servers respond. HTTP: stateless request-response. REST: resource-based URLs, HTTP methods (GET/POST/PUT/DELETE). gRPC: binary protobuf, bidirectional streaming, faster. Stateless servers scale horizontally easily. WebSockets for real-time bidirectional. Understand: request lifecycle, TCP handshake, TLS.',
+   file:'interview_prep/hld/week3/day13_intro.md'},
+
+  {id:'hld14', day:14, name:'Networking — DNS, CDN, Load Balancer', phase:'HLD', week:'Week 3', category:'Networking',
+   keyPoints:['DNS Resolution','CDN','Load Balancer','Reverse Proxy','Forward Proxy'],
+   theory:'DNS: domain → IP, recursive resolution via root → TLD → authoritative. CDN: distribute static content to edge servers, reduces latency. Load Balancer: distributes traffic (Round Robin, Least Connections, IP Hash). Reverse Proxy: sits in front of servers, hides topology, handles SSL termination. Forward Proxy: client-side, hides client identity (VPN-like).',
+   file:'interview_prep/hld/week3/day14_networking.md'},
+
+  {id:'hld15', day:15, name:'Databases — SQL, NoSQL, Indexing', phase:'HLD', week:'Week 3', category:'Databases',
+   keyPoints:['SQL vs NoSQL','ACID','Indexing','Replication','Sharding','B-Tree Index'],
+   theory:'SQL: ACID, structured, strong consistency, joins. NoSQL: BASE, flexible schema, horizontal scale. Indexing: B-Tree for range queries, Hash for exact match. Replication: master-slave (async, read scaling) or master-master. Sharding: horizontal partitioning by key — consistent hashing. Vertical scaling = bigger machine. Horizontal = more machines.',
+   file:'interview_prep/hld/week3/day15_databases.md'},
+
+  {id:'hld16', day:16, name:'Caching — Redis & Strategies', phase:'HLD', week:'Week 3', category:'Caching',
+   keyPoints:['Redis','Memcached','Cache-aside','Write-through','Write-back','Eviction Policies'],
+   theory:'Redis: in-memory, persistent, supports data structures (list, hash, set, sorted set). Memcached: simpler, pure cache. Eviction: LRU (most common), LFU, TTL. Cache-aside: app checks cache, on miss loads DB and writes to cache. Write-through: write to cache AND DB simultaneously. Write-back: write to cache, async flush to DB. Cache stampede: use mutex/locks.',
+   file:'interview_prep/hld/week3/day16_caching.md'},
+
+  {id:'hld17', day:17, name:'CAP Theorem & Consistency', phase:'HLD', week:'Week 3', category:'Distributed Systems',
+   keyPoints:['CAP Theorem','Consistency','Availability','Partition Tolerance','BASE','PACELC'],
+   theory:'CAP: in a distributed system, you can only guarantee 2 of 3: Consistency, Availability, Partition Tolerance. Network partitions always happen → choose CP or AP. CP: MongoDB, HBase, ZooKeeper. AP: Cassandra, DynamoDB, CouchDB. BASE = Basically Available, Soft state, Eventually consistent. PACELC extends CAP to also consider latency tradeoff.',
+   file:'interview_prep/hld/week3/day17_cap.md'},
+
+  {id:'hld18', day:18, name:'Scalability — Vertical, Horizontal', phase:'HLD', week:'Week 3', category:'Scalability',
+   keyPoints:['Vertical Scaling','Horizontal Scaling','Stateless Design','Auto-scaling','Bottleneck Analysis'],
+   theory:'Vertical: bigger machine — simple but has ceiling and SPOF. Horizontal: more machines — complex but near-infinite scale. Stateless servers (session in Redis/DB, not in-memory) enable horizontal scaling. Auto-scaling: scale based on CPU/memory metrics. Identify bottleneck: usually DB first, then app server. 80/20 rule: cache 80% of reads.',
+   file:'interview_prep/hld/week3/day18_scalability.md'},
+
+  // Week 4
+  {id:'hld19', day:19, name:'Microservices vs Monolith', phase:'HLD', week:'Week 4', category:'Architecture',
+   keyPoints:['Monolith','Microservices','API Gateway','Service Discovery','Circuit Breaker'],
+   theory:'Monolith: simple to start, one deployment unit, tight coupling. Microservices: independent deployments, tech flexibility, operational complexity. API Gateway: single entry point — auth, rate limiting, routing, aggregation. Service Discovery: Consul, etcd, Kubernetes — services register and find each other. Circuit Breaker: fail fast when downstream service is down (Hystrix pattern).',
+   file:'interview_prep/hld/week4/day19_microservices.md'},
+
+  {id:'hld20', day:20, name:'Message Queues — Kafka & RabbitMQ', phase:'HLD', week:'Week 4', category:'Messaging',
+   keyPoints:['Kafka','RabbitMQ','Producer-Consumer','Topics/Partitions','At-least-once Delivery','Async Decoupling'],
+   theory:'Kafka: high-throughput, durable, log-based, consumer groups, replay-able. RabbitMQ: traditional MQ, complex routing via exchanges, lower latency. Producer pushes to topic/queue. Consumer pulls (Kafka) or receives push (RabbitMQ). Kafka partitions allow parallelism — key-based partitioning for ordering. Use cases: event streaming, async task processing, data pipeline.',
+   file:'interview_prep/hld/week4/day20_queues.md'},
+
+  {id:'hld21', day:21, name:'REST API Design Best Practices', phase:'HLD', week:'Week 4', category:'API Design',
+   keyPoints:['Resource Naming','HTTP Methods','Status Codes','Versioning','Pagination','Rate Limiting'],
+   theory:'Resources = nouns (/users, /posts). HTTP verbs = actions. Status codes: 200 OK, 201 Created, 400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 429 Too Many Requests, 500 Server Error. Versioning: /v1/users or Accept header. Pagination: cursor-based (scalable) vs offset (simple). Rate limiting: token bucket or sliding window. Always return consistent error format.',
+   file:'interview_prep/hld/week4/day21_api_design.md'},
+
+  {id:'hld22', day:22, name:'HLD — URL Shortener', phase:'HLD', week:'Week 4', category:'HLD Practice',
+   keyPoints:['Base62 Encoding','Hash Collision','Redirect 301 vs 302','Analytics','Custom URLs'],
+   theory:'Requirements: shorten URL, redirect, analytics, custom alias. Scale: 100M URLs, 1B redirects/day. Schema: id, long_url, short_code, user_id, created_at, expires_at. Short code: base62(auto_increment_id) — 7 chars = 3.5T URLs. Or MD5 hash + take first 7 chars (handle collision). 302 redirect for analytics tracking. Cache hot URLs in Redis. DB: id + short_code indexed.',
+   file:'interview_prep/hld/week4/day22_url_shortener.md'},
+
+  {id:'hld23', day:23, name:'HLD — Rate Limiter', phase:'HLD', week:'Week 4', category:'HLD Practice',
+   keyPoints:['Token Bucket','Sliding Window Log','Fixed Window','Leaky Bucket','Distributed Rate Limiter'],
+   theory:'Token bucket: refill tokens at fixed rate, burst allowed. Fixed window: simple, susceptible to boundary burst. Sliding window log: precise but memory-heavy. Sliding window counter: approximation — better memory. Leaky bucket: smooth output, queue-based. Distributed: Redis + Lua script for atomicity. Headers: X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset.',
+   file:'interview_prep/hld/week4/day23_rate_limiter.md'},
+
+  {id:'hld24', day:24, name:'HLD — News Feed System', phase:'HLD', week:'Week 4', category:'HLD Practice',
+   keyPoints:['Fan-out on Write','Fan-out on Read','Timeline Service','Celebrity Problem','Ranking Algorithm'],
+   theory:'Fan-out on write (push): write to all followers\' feeds on post — fast read, slow write. Fan-out on read (pull): read from all followings on load — fast write, slow read. Hybrid: push for normal users, pull for celebrities (>1M followers). Feed ranking: recency + engagement score. Cache feed in Redis sorted set (zset). Pagination via cursor. Media in S3 + CDN.',
+   file:'interview_prep/hld/week4/day24_news_feed.md'},
+
+  {id:'hld25', day:25, name:'Full Revision + Top 20 Q&A', phase:'HLD', week:'Week 4', category:'Revision',
+   keyPoints:['LLD Review','HLD Review','Top 20 Interview Questions','System Design Framework','SDE-3 Tips'],
+   theory:'Full revision day. Go through your LLD class diagrams. Review each HLD problem template. Practice the 5-step framework: Clarify → Estimate → Design → Deep Dive → Bottlenecks. For SDE-3: always discuss trade-offs, think about failure scenarios, mention monitoring/alerting, propose a phased rollout strategy.',
+   file:'interview_prep/hld/week4/day25_revision.md'},
+];
+
+// 25-day schedule
+const SCHEDULE = [
+  [1,'OOP Basics — 4 Pillars','LLD',['lld1'],'Focus on the 4 pillars with Python examples. Write a mini class hierarchy: Shape → Circle/Rectangle with area() and perimeter(). Practice encapsulation with @property.'],
+  [2,'SOLID Principles','LLD',['lld2'],'Apply each principle to a real example. Refactor a bad class that violates SRP. Write an open-closed payment system that supports new payment methods without modification.'],
+  [3,'UML Class Diagrams','LLD',['lld3'],'Draw class diagrams for a library system and a parking lot. Practice all 5 relationship types. Understand multiplicity notation.'],
+  [4,'Python OOP Deep Dive','LLD',['lld4'],'Implement __eq__, __hash__, __repr__. Write a class using @property with validation. Create an ABC for Shape with abstract area().'],
+  [5,'Revision + Practice Exercise','LLD',['lld5'],'Revision day — code from memory, no notes. Build a mini class hierarchy applying OOP + SOLID. Write UML diagram on paper.'],
+  [6,'Creational Design Patterns','LLD',['lld6'],'Implement Singleton logger. Build a Factory for notifications (SMS/Email/Push). Use Builder for complex query object.'],
+  [7,'Structural Design Patterns','LLD',['lld7'],'Implement Decorator for adding taxes/discounts to a price. Build Adapter for legacy payment API. Facade for complex subsystem.'],
+  [8,'Behavioral Design Patterns','LLD',['lld8'],'Strategy for sorting algorithms. Observer for event system. Command pattern with undo/redo.'],
+  [9,'LLD Problem — Parking Lot','LLD',['lld9'],'Design full parking lot system. Focus on: spot allocation, ticketing, payment. 35 min timed. Draw UML first.'],
+  [10,'LLD Problem — Library Management','LLD',['lld10'],'Design library system with book reservation and fine calculation. 35 min timed.'],
+  [11,'LLD Problem — Elevator System','LLD',['lld11'],'Design elevator with SCAN algorithm. Focus on state machine for elevator car. 35 min timed.'],
+  [12,'LLD Mock + Interview Q&A','LLD',['lld12'],'Mock LLD session. Pick one unseen problem (ATM or Chess). Aim for full class diagram + core classes coded in 40 minutes.'],
+  [13,'HLD Intro — Client-Server','HLD',['hld13'],'Trace HTTP request lifecycle. Compare REST vs gRPC. Draw a simple 3-tier architecture.'],
+  [14,'Networking — DNS, CDN, LB','HLD',['hld14'],'Explain DNS resolution from scratch. Compare L4 vs L7 load balancers. When to use CDN?'],
+  [15,'Databases Deep Dive','HLD',['hld15'],'Compare MySQL vs MongoDB vs Cassandra. Explain B-Tree indexing. Design a sharding strategy for 1B users.'],
+  [16,'Caching with Redis','HLD',['hld16'],'Compare caching strategies. When does cache-aside fail? Implement sliding window counter in Redis pseudo-code.'],
+  [17,'CAP Theorem & Consistency','HLD',['hld17'],'Explain CAP with real examples. When to choose AP over CP? Describe eventual consistency in DynamoDB.'],
+  [18,'Scalability Patterns','HLD',['hld18'],'Design stateless app tier. When to use vertical vs horizontal? Identify bottlenecks in a 10M DAU system.'],
+  [19,'Microservices & API Gateway','HLD',['hld19'],'Compare monolith vs microservices trade-offs. Design API gateway for an e-commerce system.'],
+  [20,'Message Queues — Kafka','HLD',['hld20'],'Explain Kafka partitions and consumer groups. Design event-driven order processing system.'],
+  [21,'REST API Best Practices','HLD',['hld21'],'Design RESTful API for a social network. Handle versioning, pagination, rate limiting.'],
+  [22,'HLD Problem — URL Shortener','HLD',['hld22'],'Full HLD: requirements → scale estimates → design → DB schema → API → deep dive. 40 min timed.'],
+  [23,'HLD Problem — Rate Limiter','HLD',['hld23'],'Full HLD: design distributed rate limiter. Explain algorithm choice, Redis implementation, edge cases.'],
+  [24,'HLD Problem — News Feed','HLD',['hld24'],'Full HLD: news feed with fan-out strategy. Handle celebrity problem. 40 min timed.'],
+  [25,'Full Revision + Top 20 Q&A','HLD',['hld25'],'Grand revision. Walk through all 25 topics. Practice top 20 interview questions. You are ready! 🎉'],
+];
+
+// Revision days (0-indexed): Day 5 and Day 12
+const REVISION_DAYS = new Set([4, 11, 24]);
+
+// ══════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════
+const STORE_KEY = 'sd_prep_v1';
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return { startDate: null, studied: [], lastActive: null, streak: 0, longestStreak: 0, lastExport: null, lastImport: null };
+}
+
+function saveState() {
+  localStorage.setItem(STORE_KEY, JSON.stringify(state));
+}
+
+let state = loadState();
+let selectedDayIdx = -1;
+
+// ══════════════════════════════════════════════════════════════
+// DATE HELPERS
+// ══════════════════════════════════════════════════════════════
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function recordActivity() {
+  const today = todayStr();
+  if (state.lastActive !== today) {
+    if (!state.lastActive) {
+      state.streak = 1;
+    } else {
+      const last = new Date(state.lastActive);
+      const now = new Date(today);
+      const diff = Math.round((now - last) / 86400000);
+      state.streak = diff === 1 ? state.streak + 1 : 1;
+    }
+    state.longestStreak = Math.max(state.longestStreak, state.streak);
+    state.lastActive = today;
+    saveState();
+  }
+}
+
+function isStudied(id) { return state.studied.includes(id); }
+
+function getDayIndex() {
+  if (!state.startDate) return -1;
+  const start = new Date(state.startDate);
+  const today = new Date(todayStr());
+  return Math.floor((today - start) / 86400000);
+}
+
+function getEffectiveDayIndex() {
+  const calIdx = getDayIndex();
+  let consec = 0;
+  for (let i = 0; i < 25; i++) {
+    const topicIds = SCHEDULE[i][3];
+    if (topicIds.length === 0 || topicIds.every(id => isStudied(id))) consec = i + 1;
+    else break;
+  }
+  if (calIdx < 0) return consec > 0 ? Math.min(consec, 24) : -1;
+  return Math.min(Math.max(calIdx, consec), 24);
+}
+
+function getCurrentDay() {
+  const effIdx = getEffectiveDayIndex();
+  if (effIdx < 0) return null;
+  for (let i = 0; i <= effIdx; i++) {
+    const topicIds = SCHEDULE[i][3];
+    if (topicIds.length > 0 && !topicIds.every(id => isStudied(id))) return SCHEDULE[i];
+  }
+  return effIdx < 25 ? SCHEDULE[Math.min(effIdx, 24)] : null;
+}
+
+function getDayStatus(idx) {
+  const [day, title, phase, topicIds] = SCHEDULE[idx];
+  const calIdx = getDayIndex();
+  if (idx === calIdx) return 'today';
+  if (idx > calIdx) {
+    if (topicIds.length > 0 && topicIds.every(id => isStudied(id))) return 'done';
+    return 'future';
+  }
+  if (REVISION_DAYS.has(idx) && topicIds.every(id => isStudied(id))) return 'done';
+  if (REVISION_DAYS.has(idx)) return 'rest';
+  if (topicIds.length === 0) return 'rest';
+  if (topicIds.every(id => isStudied(id))) return 'done';
+  if (topicIds.some(id => isStudied(id))) return 'partial';
+  return 'missed';
+}
+
+// ══════════════════════════════════════════════════════════════
+// MARK STUDIED
+// ══════════════════════════════════════════════════════════════
+function toggleStudied(id, rerender) {
+  if (isStudied(id)) {
+    state.studied = state.studied.filter(s => s !== id);
+  } else {
+    state.studied.push(id);
+    recordActivity();
+  }
+  saveState();
+  updateStreakPill();
+  if (rerender === 'dashboard') renderDashboard();
+  else if (rerender === 'schedule') { renderSchedule(); if (selectedDayIdx >= 0) showDayDetail(selectedDayIdx); }
+  else if (rerender === 'topics') renderTopics();
+}
+
+// ══════════════════════════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════════════════════════
+function goTab(name, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  el.classList.add('active');
+  if (name === 'dashboard') renderDashboard();
+  else if (name === 'schedule') renderSchedule();
+  else if (name === 'topics') renderTopics();
+  else if (name === 'cheatsheet') renderCheatSheet();
+  else if (name === 'backup') renderBackup();
+}
+
+// ══════════════════════════════════════════════════════════════
+// ONBOARDING
+// ══════════════════════════════════════════════════════════════
+function checkOnboard() {
+  if (!state.startDate) {
+    const ob = document.getElementById('onboard');
+    ob.style.display = 'flex';
+    const inp = document.getElementById('startDateInput');
+    inp.value = todayStr();
+  }
+}
+
+function saveStartDate() {
+  const v = document.getElementById('startDateInput').value;
+  if (!v) return;
+  state.startDate = v;
+  state.streak = 1;
+  state.lastActive = todayStr();
+  state.longestStreak = 1;
+  saveState();
+  document.getElementById('onboard').style.display = 'none';
+  init();
+}
+
+// ══════════════════════════════════════════════════════════════
+// STREAK PILL
+// ══════════════════════════════════════════════════════════════
+function updateStreakPill() {
+  const pill = document.getElementById('streakPill');
+  const s = state.streak || 0;
+  pill.innerHTML = `🔥 ${s} day${s !== 1 ? 's' : ''}`;
+}
+
+// ══════════════════════════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════════════════════════
+function renderDashboard() {
+  const dayIdx = getDayIndex();
+  const effIdx = getEffectiveDayIndex();
+  const todayDay = getCurrentDay();
+  const studied = state.studied.length;
+  const total = TOPICS.length; // 25
+  const daysAhead = (effIdx >= 0 && dayIdx >= 0) ? Math.max(0, effIdx - dayIdx) : 0;
+
+  const finishStr = (() => {
+    if (!state.startDate) return '';
+    const d = new Date(state.startDate);
+    d.setDate(d.getDate() + 24 - daysAhead);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  })();
+
+  // Phase stats
+  const lldTopics = TOPICS.filter(t => t.phase === 'LLD');
+  const hldTopics = TOPICS.filter(t => t.phase === 'HLD');
+  const lldDone = lldTopics.filter(t => isStudied(t.id)).length;
+  const hldDone = hldTopics.filter(t => isStudied(t.id)).length;
+  const lldPct = Math.round(lldDone / lldTopics.length * 100);
+  const hldPct = Math.round(hldDone / hldTopics.length * 100);
+
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat">
+      <div class="stat-num" style="color:#34d399">${studied}</div>
+      <div class="stat-label">Topics Studied</div>
+      <div class="stat-sub">of ${total} total · ${Math.round(studied/total*100)}%</div>
+      <div class="prog-wrap" style="margin-top:10px"><div class="prog-fill green" style="width:${Math.round(studied/total*100)}%"></div></div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" style="color:#fbbf24">🔥 ${state.streak||0}</div>
+      <div class="stat-label">Current Streak</div>
+      <div class="stat-sub">Best: ${state.longestStreak||0} days</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" style="color:#818cf8">${effIdx >= 0 ? Math.min(effIdx+1, 25) : '—'}</div>
+      <div class="stat-label">Day of Journey</div>
+      <div class="stat-sub">${effIdx >= 0 ? `of 25${daysAhead > 0 ? ` · 🚀 ${daysAhead}d ahead` : ''}` : 'Set a start date to begin'}</div>
+      ${finishStr ? `<div class="stat-sub" style="margin-top:4px;color:#34d399;font-size:11px;font-weight:600">🏁 Est. finish: ${finishStr}</div>` : ''}
+    </div>
+    <div class="stat">
+      <div class="stat-num" style="color:#a78bfa">${state.startDate ? Math.max(0, dayIdx+1) : '—'}</div>
+      <div class="stat-label">Est. Finish</div>
+      <div class="stat-sub">${finishStr ? finishStr : 'Start first'}</div>
+      ${state.startDate ? `<div class="stat-sub" style="margin-top:4px;font-size:11px">Started ${new Date(state.startDate).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</div>` : ''}
+    </div>
+  `;
+
+  // Today card
+  const todayCard = document.getElementById('todayCard');
+  if (!todayDay) {
+    todayCard.innerHTML = `<div class="empty"><div class="empty-icon">📅</div>Set a start date to see today's topic!</div>`;
+  } else {
+    const [day, title, phase, topicIds, theory] = todayDay;
+    const schedTopics = topicIds.map(id => TOPICS.find(t => t.id === id)).filter(Boolean);
+    const allDone = schedTopics.length > 0 && schedTopics.every(t => isStudied(t.id));
+    const di = day - 1;
+    const ctx = di > dayIdx ? '🚀 NEXT UP' : di < dayIdx ? '⚠️ CATCH UP' : '📍 TODAY';
+    const phaseColor = phase === 'LLD' ? 'var(--lld)' : 'var(--hld)';
+
+    todayCard.innerHTML = `
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap">
+        <div>
+          <div class="label-sm">${ctx} — Day ${day} of 25</div>
+          <div style="font-size:20px;font-weight:700;margin-top:4px">${title}</div>
+          ${allDone ? '<span class="badge b-done" style="margin-top:6px;display:inline-flex">✅ All Done!</span>' : ''}
+        </div>
+        <span class="badge" style="background:rgba(129,140,248,.15);color:${phaseColor}">${phase}</span>
+      </div>
+      <div style="font-size:13px;color:var(--muted2);margin-bottom:16px;line-height:1.6;padding:12px;background:rgba(255,255,255,.03);border-radius:8px;border-left:3px solid ${phaseColor}">${theory}</div>
+      ${schedTopics.map(t => `
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+          <div class="chk ${isStudied(t.id)?'done':''}" onclick="toggleStudied('${t.id}','dashboard')"></div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600;${isStudied(t.id)?'text-decoration:line-through;color:var(--muted)':''}">${t.name}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">${t.category}</div>
+          </div>
+          ${t.file ? `<a class="prob-file" href="https://raw.githubusercontent.com/kumarakshay2456/coding-interview-problems/master/${t.file}" target="_blank" rel="noopener">↗ ${t.file.split('/').pop()}</a>` : ''}
+          <button class="btn-chatgpt" onclick="openChatGPT('${t.id}')">✦ Ask GPT</button>
+        </div>
+      `).join('')}
+    `;
+  }
+
+  // Phase progress
+  const pp = document.getElementById('phaseProgress');
+  pp.innerHTML = `
+    <div class="label-sm" style="margin-bottom:16px">Phase Progress</div>
+    <div style="margin-bottom:20px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:13px;font-weight:600;color:var(--lld)">LLD — Low Level Design</span>
+        <span style="font-size:12px;color:var(--muted)">${lldDone}/${lldTopics.length} · ${lldPct}%</span>
+      </div>
+      <div class="prog-wrap" style="height:8px"><div class="prog-fill" style="width:${lldPct}%;background:linear-gradient(90deg,#4f46e5,#818cf8)"></div></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px">Days 1–12 · OOP, SOLID, Patterns, LLD Problems</div>
+    </div>
+    <div style="margin-bottom:24px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:13px;font-weight:600;color:var(--hld)">HLD — High Level Design</span>
+        <span style="font-size:12px;color:var(--muted)">${hldDone}/${hldTopics.length} · ${hldPct}%</span>
+      </div>
+      <div class="prog-wrap" style="height:8px"><div class="prog-fill green" style="width:${hldPct}%"></div></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px">Days 13–25 · Networking, DB, Caching, HLD Problems</div>
+    </div>
+    <div class="divider"></div>
+    <div class="label-sm" style="margin-bottom:12px">Category Breakdown</div>
+    ${['Foundations','Design Patterns','LLD Practice','Networking','Databases','Caching','Distributed Systems','Scalability','Architecture','Messaging','API Design','HLD Practice','Revision'].map(cat => {
+      const catTopics = TOPICS.filter(t => t.category === cat);
+      if (catTopics.length === 0) return '';
+      const done = catTopics.filter(t => isStudied(t.id)).length;
+      const pct = Math.round(done/catTopics.length*100);
+      const col = catTopics[0].phase === 'LLD' ? 'var(--lld)' : 'var(--hld)';
+      return `<div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+          <span style="font-size:12px;color:${col}">${cat}</span>
+          <span style="font-size:11px;color:var(--muted)">${done}/${catTopics.length}</span>
+        </div>
+        <div class="prog-wrap" style="height:4px"><div class="prog-fill" style="width:${pct}%;background:${col}"></div></div>
+      </div>`;
+    }).join('')}
+  `;
+
+  // Week preview
+  renderWeekPreview();
+}
+
+function renderWeekPreview() {
+  const dayIdx = getDayIndex();
+  const start = Math.max(0, dayIdx - 2);
+  const end = Math.min(24, start + 6);
+  const wrap = document.getElementById('weekPreview');
+  if (!state.startDate) { wrap.innerHTML = ''; return; }
+  wrap.innerHTML = `<div class="label-sm" style="margin-bottom:12px">Week Preview</div>
+  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px">
+    ${Array.from({length:7},(_,i) => {
+      const d = start + i;
+      if (d > 24) return '<div></div>';
+      const sched = SCHEDULE[d];
+      const status = getDayStatus(d);
+      const isToday = d === dayIdx;
+      const phaseColor = sched[2] === 'LLD' ? 'rgba(129,140,248,' : 'rgba(52,211,153,';
+      const colors = {today:'rgba(99,102,241,.25)',done:'rgba(52,211,153,.15)',partial:'rgba(251,191,36,.12)',missed:'rgba(248,113,113,.1)',future:'rgba(255,255,255,.02)',rest:'rgba(167,139,250,.08)'};
+      return `<div style="background:${colors[status]||colors.future};border-radius:10px;padding:10px 8px;text-align:center;border:1px solid ${isToday?'#818cf8':'transparent'}">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:3px">Day ${d+1}</div>
+        <div style="font-size:10px;font-weight:700;color:${sched[2]==='LLD'?'var(--lld)':'var(--hld)'};margin-bottom:3px">${sched[2]}</div>
+        <div style="font-size:10px;font-weight:600;line-height:1.3;color:${isToday?'#818cf8':'var(--text)'}">${sched[1].substring(0,20)}${sched[1].length>20?'…':''}</div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════
+// SCHEDULE
+// ══════════════════════════════════════════════════════════════
+function renderSchedule() {
+  const dayIdx = getDayIndex();
+  const grid = document.getElementById('schedGrid');
+  grid.innerHTML = SCHEDULE.map(([day,title,phase,topicIds,theory], i) => {
+    const status = state.startDate ? getDayStatus(i) : 'future';
+    const phaseColor = phase === 'LLD' ? 'var(--lld)' : 'var(--hld)';
+    const done = topicIds.filter(id => isStudied(id)).length;
+    return `<div class="sday ${status}" onclick="showDayDetail(${i})">
+      <div class="sday-num">DAY ${day}</div>
+      <div class="sday-title">${title}</div>
+      <div class="sday-phase" style="color:${phaseColor}">${phase}</div>
+      ${topicIds.length > 0 ? `<div style="font-size:10px;color:var(--muted);margin-top:4px">${done}/${topicIds.length} done</div>` : ''}
+    </div>`;
+  }).join('');
+
+  if (dayIdx >= 0 && dayIdx < 25 && selectedDayIdx === -1) {
+    showDayDetail(dayIdx);
+  } else if (selectedDayIdx >= 0) {
+    showDayDetail(selectedDayIdx);
+  }
+}
+
+function showDayDetail(idx) {
+  selectedDayIdx = idx;
+  const [day, title, phase, topicIds, theory] = SCHEDULE[idx];
+  const schedTopics = topicIds.map(id => TOPICS.find(t => t.id === id)).filter(Boolean);
+  const status = state.startDate ? getDayStatus(idx) : 'future';
+  const phaseColor = phase === 'LLD' ? 'var(--lld)' : 'var(--hld)';
+  const statusLabel = {today:'📍 Today',done:'✅ Completed',partial:'🔶 In Progress',missed:'❌ Missed',future:'🔮 Upcoming',rest:'🧘 Revision Day'}[status] || '';
+
+  const detail = document.getElementById('dayDetail');
+  detail.className = 'day-detail visible';
+  detail.innerHTML = `
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap">
+      <div>
+        <div class="label-sm">Day ${day} of 25 · ${statusLabel}</div>
+        <div style="font-size:18px;font-weight:700;margin-top:4px">${title}</div>
+        <span class="badge" style="margin-top:8px;background:rgba(129,140,248,.12);color:${phaseColor}">${phase}</span>
+      </div>
+      ${schedTopics.length > 0 ? `<span style="font-size:13px;color:var(--muted2)">${schedTopics.filter(t=>isStudied(t.id)).length}/${schedTopics.length} studied</span>` : ''}
+    </div>
+    <div style="font-size:13px;color:var(--muted2);line-height:1.7;margin-bottom:16px;padding:12px;background:rgba(255,255,255,.03);border-radius:8px;border-left:3px solid ${phaseColor}">${theory}</div>
+    ${schedTopics.map(t => `
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+        <div class="chk ${isStudied(t.id)?'done':''}" onclick="toggleStudied('${t.id}','schedule')"></div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600;${isStudied(t.id)?'text-decoration:line-through;color:var(--muted)':''}">${t.name}</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px">${t.keyPoints.map(kp=>`<span class="kp">${kp}</span>`).join('')}</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          ${t.file ? `<a class="prob-file" href="https://raw.githubusercontent.com/kumarakshay2456/coding-interview-problems/master/${t.file}" target="_blank" rel="noopener">↗ File</a>` : ''}
+          <button class="btn-chatgpt" onclick="openChatGPT('${t.id}')">✦ GPT</button>
+        </div>
+      </div>
+    `).join('')}
+    <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+      ${idx > 0 ? `<button class="btn btn-ghost btn-sm" onclick="showDayDetail(${idx-1})">← Day ${idx}</button>` : ''}
+      ${idx < 24 ? `<button class="btn btn-ghost btn-sm" onclick="showDayDetail(${idx+1})">Day ${idx+2} →</button>` : ''}
+    </div>
+  `;
+
+  // Scroll to detail
+  detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ══════════════════════════════════════════════════════════════
+// TOPICS ACCORDION
+// ══════════════════════════════════════════════════════════════
+function renderTopics() {
+  const filter = document.getElementById('topicFilter').value;
+  const container = document.getElementById('topicsContent');
+  let html = '';
+
+  const phases = filter === 'all' ? ['LLD', 'HLD'] : [filter];
+
+  phases.forEach(phase => {
+    const phaseTopics = TOPICS.filter(t => t.phase === phase);
+    const phaseColor = phase === 'LLD' ? 'var(--lld)' : 'var(--hld)';
+    const phaseDone = phaseTopics.filter(t => isStudied(t.id)).length;
+    html += `<div class="phase-header"><span style="color:${phaseColor}">${phase}</span> <span style="font-size:13px;color:var(--muted)">— ${phaseDone}/${phaseTopics.length} studied</span></div>`;
+
+    const weeks = [...new Set(phaseTopics.map(t => t.week))];
+    weeks.forEach(week => {
+      const weekTopics = phaseTopics.filter(t => t.week === week);
+      const weekDone = weekTopics.filter(t => isStudied(t.id)).length;
+      const weekId = `acc-${phase}-${week.replace(/\s/g,'-')}`;
+
+      html += `<div class="acc">
+        <div class="acc-head" id="head-${weekId}" onclick="toggleAcc('${weekId}')">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-weight:700">${week}</span>
+            <span class="badge" style="background:rgba(129,140,248,.1);color:${phaseColor}">${weekDone}/${weekTopics.length}</span>
+          </div>
+          <svg class="acc-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="acc-body" id="body-${weekId}">
+          ${weekTopics.map(t => renderTopicRow(t)).join('')}
+        </div>
+      </div>`;
+    });
+  });
+
+  container.innerHTML = html;
+}
+
+function renderTopicRow(t) {
+  const done = isStudied(t.id);
+  const phaseColor = t.phase === 'LLD' ? 'var(--lld)' : 'var(--hld)';
+  return `<div class="topic-item" id="tr-${t.id}">
+    <div class="chk ${done?'done':''}" onclick="toggleStudied('${t.id}','topics')"></div>
+    <div class="topic-info">
+      <div class="topic-name ${done?'done':''}">Day ${t.day}: ${t.name}</div>
+      <div class="topic-meta">
+        <span class="badge" style="background:rgba(129,140,248,.1);color:${phaseColor}">${t.phase}</span>
+        <span class="tag">${t.category}</span>
+      </div>
+      <div class="kp-list">${t.keyPoints.map(kp=>`<span class="kp">${kp}</span>`).join('')}</div>
+      <div class="theory-box" id="theory-${t.id}">${t.theory}</div>
+    </div>
+    <div style="display:flex;gap:6px;flex-direction:column;align-items:flex-end;flex-shrink:0">
+      <button class="btn-reveal" onclick="toggleTheory('${t.id}')">💡 Theory</button>
+      ${t.file ? `<a class="prob-file" href="https://raw.githubusercontent.com/kumarakshay2456/coding-interview-problems/master/${t.file}" target="_blank" rel="noopener">↗ File</a>` : ''}
+      <button class="btn-chatgpt" onclick="openChatGPT('${t.id}')">✦ Ask GPT</button>
+    </div>
+  </div>`;
+}
+
+function toggleTheory(id) {
+  const box = document.getElementById('theory-' + id);
+  box.classList.toggle('show');
+}
+
+function toggleAcc(id) {
+  const head = document.getElementById('head-' + id);
+  const body = document.getElementById('body-' + id);
+  head.classList.toggle('open');
+  body.classList.toggle('open');
+}
+
+// ══════════════════════════════════════════════════════════════
+// CHATGPT
+// ══════════════════════════════════════════════════════════════
+function openChatGPT(topicId) {
+  const topic = TOPICS.find(t => t.id === topicId);
+  if (!topic) return;
+  const prompt = `You are an expert system design mentor.\nExplain "${topic.name}" in complete interview-ready format for an SDE-3 role.\nCover: core concepts, real-world examples, trade-offs, Python code where applicable, common interview questions and answers.`;
+  navigator.clipboard.writeText(prompt).catch(()=>{});
+  window.open('https://chatgpt.com/', '_blank');
+  showToast('✦ Prompt copied to clipboard!');
+}
+
+// ══════════════════════════════════════════════════════════════
+// CHEAT SHEET
+// ══════════════════════════════════════════════════════════════
+function renderCheatSheet() {
+  document.getElementById('cheatContent').innerHTML = getCheatSheetHTML();
+}
+
+function getCheatSheetHTML() {
+  return `
+<!-- Section 1: OOP Pillars -->
+<div class="cs-section">
+  <h3>1 — OOP Pillars Quick Reference</h3>
+  <div class="card" style="padding:0;overflow:hidden">
+  <table class="cs-table">
+    <thead><tr><th>Pillar</th><th>Definition</th><th>Python Example</th><th>Interview Tip</th></tr></thead>
+    <tbody>
+      <tr><td><b style="color:var(--lld)">Encapsulation</b></td><td>Bundle data + methods; control access via access modifiers</td><td><code>self.__balance = 0</code> + <code>@property</code></td><td>Explain WHY it prevents invalid state. Show @property getter/setter</td></tr>
+      <tr><td><b style="color:var(--lld)">Inheritance</b></td><td>IS-A relationship; subclass inherits + extends parent</td><td><code>class Dog(Animal): def speak(self): return "Woof"</code></td><td>Mention MRO (Method Resolution Order) for multiple inheritance</td></tr>
+      <tr><td><b style="color:var(--lld)">Polymorphism</b></td><td>Same interface, different behavior (overriding + duck typing)</td><td><code>for shape in shapes: shape.area()</code></td><td>Python uses duck typing — if it quacks like a duck, it IS a duck</td></tr>
+      <tr><td><b style="color:var(--lld)">Abstraction</b></td><td>Hide complexity, expose only necessary interface</td><td><code>from abc import ABC, abstractmethod</code></td><td>ABCs enforce the contract. Draw what users see vs what's hidden</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- Section 2: SOLID -->
+<div class="cs-section">
+  <h3>2 — SOLID Principles</h3>
+  <div class="card" style="padding:0;overflow:hidden">
+  <table class="cs-table">
+    <thead><tr><th>Code</th><th>Full Name</th><th>Meaning</th><th>Violation Sign</th><th>Fix</th></tr></thead>
+    <tbody>
+      <tr><td><b style="color:var(--warn)">S</b></td><td>Single Responsibility</td><td>One class = one reason to change</td><td>Class handles DB + logging + formatting</td><td>Split into UserRepo, Logger, Formatter</td></tr>
+      <tr><td><b style="color:var(--warn)">O</b></td><td>Open-Closed</td><td>Open for extension, closed for modification</td><td>Adding new payment type requires editing existing if/else</td><td>Abstract PaymentProcessor, concrete Stripe/PayPal</td></tr>
+      <tr><td><b style="color:var(--warn)">L</b></td><td>Liskov Substitution</td><td>Subclasses must be substitutable for base</td><td>Rectangle.setWidth breaks when Square overrides it</td><td>Don't inherit when IS-A relationship breaks</td></tr>
+      <tr><td><b style="color:var(--warn)">I</b></td><td>Interface Segregation</td><td>Don't force clients to implement unused methods</td><td>IWorker has work() + eat() — robots don't eat</td><td>Separate IWorkable + IEatable interfaces</td></tr>
+      <tr><td><b style="color:var(--warn)">D</b></td><td>Dependency Inversion</td><td>Depend on abstractions, not concretions</td><td>Service directly imports MySQLDB class</td><td>Service takes IDatabase interface in constructor</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- Section 3: Design Patterns -->
+<div class="cs-section">
+  <h3>3 — Design Patterns Reference</h3>
+  <div style="font-size:14px;font-weight:700;color:var(--muted2);margin-bottom:10px;margin-top:4px">Creational Patterns</div>
+  <div class="card" style="padding:0;overflow:hidden;margin-bottom:16px">
+  <table class="cs-table">
+    <thead><tr><th>Pattern</th><th>Intent</th><th>Use When</th><th>Python Hint</th></tr></thead>
+    <tbody>
+      <tr><td><b>Singleton</b></td><td>Ensure only one instance exists globally</td><td>DB connection pool, Logger, Config</td><td>Use <code>__new__</code> or module-level instance; thread-safe with lock</td></tr>
+      <tr><td><b>Factory Method</b></td><td>Delegate object creation to subclasses</td><td>When exact type determined at runtime</td><td><code>@classmethod create(cls, type)</code> returns subclass</td></tr>
+      <tr><td><b>Abstract Factory</b></td><td>Create families of related objects</td><td>UI toolkit with Windows/Mac themes</td><td>Factory of factories — returns consistent family</td></tr>
+      <tr><td><b>Builder</b></td><td>Construct complex objects step by step</td><td>SQL query builder, Pizza, Config objects</td><td>Method chaining: <code>builder.set_x().set_y().build()</code></td></tr>
+      <tr><td><b>Prototype</b></td><td>Clone existing objects instead of creating new</td><td>Expensive initialization, object pools</td><td><code>import copy; copy.deepcopy(obj)</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div style="font-size:14px;font-weight:700;color:var(--muted2);margin-bottom:10px">Structural Patterns</div>
+  <div class="card" style="padding:0;overflow:hidden;margin-bottom:16px">
+  <table class="cs-table">
+    <thead><tr><th>Pattern</th><th>Intent</th><th>Use When</th><th>Python Hint</th></tr></thead>
+    <tbody>
+      <tr><td><b>Adapter</b></td><td>Make incompatible interfaces work together</td><td>Legacy API integration, third-party libs</td><td>Wrap old class, expose new interface</td></tr>
+      <tr><td><b>Decorator</b></td><td>Add responsibility dynamically without subclassing</td><td>Middleware, logging, auth, compression</td><td>Native <code>@decorator</code> syntax or wrapping class</td></tr>
+      <tr><td><b>Facade</b></td><td>Simplified interface to complex subsystem</td><td>Complex library with many classes</td><td>Single class that orchestrates multiple subsystems</td></tr>
+      <tr><td><b>Proxy</b></td><td>Placeholder controlling access to another object</td><td>Lazy loading, caching, access control</td><td>Implement same interface, delegate to real object</td></tr>
+      <tr><td><b>Composite</b></td><td>Treat individual objects and groups uniformly</td><td>File system, UI components, menus</td><td>Component interface; Leaf + Composite both implement it</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div style="font-size:14px;font-weight:700;color:var(--muted2);margin-bottom:10px">Behavioral Patterns</div>
+  <div class="card" style="padding:0;overflow:hidden">
+  <table class="cs-table">
+    <thead><tr><th>Pattern</th><th>Intent</th><th>Use When</th><th>Python Hint</th></tr></thead>
+    <tbody>
+      <tr><td><b>Strategy</b></td><td>Encapsulate algorithms, swap at runtime</td><td>Sorting algorithms, payment methods</td><td>Pass strategy object in constructor; call <code>strategy.execute()</code></td></tr>
+      <tr><td><b>Observer</b></td><td>Notify dependents on state change</td><td>Event systems, UI updates, pub/sub</td><td>Subject has <code>observers</code> list; call <code>notify()</code> on change</td></tr>
+      <tr><td><b>Command</b></td><td>Encapsulate request as an object</td><td>Undo/redo, queue operations, macros</td><td>Command with <code>execute()</code> and <code>undo()</code>; store in history</td></tr>
+      <tr><td><b>Iterator</b></td><td>Sequential traversal without exposing internals</td><td>Custom collections</td><td>Implement <code>__iter__</code> and <code>__next__</code></td></tr>
+      <tr><td><b>Template Method</b></td><td>Algorithm skeleton in base, steps in subclasses</td><td>Data mining, report generation</td><td>Base class with <code>template_method()</code> calling <code>@abstractmethod</code> steps</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- Section 4: HLD Core Concepts -->
+<div class="cs-section">
+  <h3>4 — HLD Core Concepts</h3>
+  <div class="card" style="padding:0;overflow:hidden">
+  <table class="cs-table">
+    <thead><tr><th>Concept</th><th>What it Solves</th><th>Key Trade-off</th></tr></thead>
+    <tbody>
+      <tr><td><b style="color:var(--hld)">Load Balancer</b></td><td>Distribute traffic across multiple servers</td><td>Adds latency + single point of failure if not redundant</td></tr>
+      <tr><td><b style="color:var(--hld)">CDN</b></td><td>Serve static content from edge locations near user</td><td>Stale content; cache invalidation is hard</td></tr>
+      <tr><td><b style="color:var(--hld)">Caching</b></td><td>Reduce DB load, improve read latency</td><td>Cache invalidation, stale reads, memory limits</td></tr>
+      <tr><td><b style="color:var(--hld)">Database Sharding</b></td><td>Horizontal scale beyond single machine limits</td><td>Cross-shard joins become complex; rebalancing is hard</td></tr>
+      <tr><td><b style="color:var(--hld)">Message Queue</b></td><td>Async decoupling, handle traffic spikes</td><td>Eventual consistency; complex error handling (dead letter queues)</td></tr>
+      <tr><td><b style="color:var(--hld)">Replication</b></td><td>High availability, read scaling</td><td>Replication lag; master-master conflicts</td></tr>
+      <tr><td><b style="color:var(--hld)">API Gateway</b></td><td>Single entry point for auth, routing, rate limiting</td><td>Bottleneck if not scaled; added latency hop</td></tr>
+      <tr><td><b style="color:var(--hld)">Consistent Hashing</b></td><td>Minimize key remapping when nodes added/removed</td><td>Hot spots without virtual nodes</td></tr>
+      <tr><td><b style="color:var(--hld)">Circuit Breaker</b></td><td>Fail fast when downstream is unhealthy</td><td>False positives can block valid traffic</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- Section 5: Database Comparison -->
+<div class="cs-section">
+  <h3>5 — Database Comparison</h3>
+  <div class="card" style="padding:0;overflow:hidden">
+  <table class="cs-table">
+    <thead><tr><th>Type</th><th>Examples</th><th>Best For</th><th>Avoid When</th><th>Scale Strategy</th></tr></thead>
+    <tbody>
+      <tr><td><b>Relational SQL</b></td><td>PostgreSQL, MySQL</td><td>Transactions, complex joins, financial data</td><td>Need horizontal scale or flexible schema</td><td>Read replicas, vertical scale, then shard</td></tr>
+      <tr><td><b>Document</b></td><td>MongoDB, CouchDB</td><td>Flexible schema, nested documents, catalog</td><td>Complex relations, ACID needed across docs</td><td>Auto-sharding by shard key</td></tr>
+      <tr><td><b>Wide-column</b></td><td>Cassandra, HBase</td><td>Time-series, write-heavy, massive scale</td><td>Complex queries, ad-hoc analytics</td><td>Consistent hashing ring, linear scale</td></tr>
+      <tr><td><b>Key-Value</b></td><td>Redis, DynamoDB, etcd</td><td>Sessions, caching, leaderboards</td><td>Complex queries or relations needed</td><td>Partition by key, DynamoDB auto-scales</td></tr>
+      <tr><td><b>Graph</b></td><td>Neo4j, Amazon Neptune</td><td>Social networks, fraud detection, recommendations</td><td>Simple or tabular data</td><td>Hard to distribute; partition by community</td></tr>
+      <tr><td><b>Search Engine</b></td><td>Elasticsearch, Solr</td><td>Full-text search, log analytics</td><td>Primary data store (use as secondary index)</td><td>Shards + replicas natively</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- Section 6: Caching Strategies -->
+<div class="cs-section">
+  <h3>6 — Caching Strategies</h3>
+  <div class="card" style="padding:0;overflow:hidden">
+  <table class="cs-table">
+    <thead><tr><th>Strategy</th><th>Description</th><th>Use Case</th><th>Drawback</th></tr></thead>
+    <tbody>
+      <tr><td><b style="color:var(--accent)">Cache-aside</b><br><span style="font-size:11px;color:var(--muted)">(Lazy Loading)</span></td><td>App checks cache → miss → load from DB → write to cache</td><td>Read-heavy, data accessed sporadically</td><td>Cache miss penalty on first request; stale data possible</td></tr>
+      <tr><td><b style="color:var(--accent)">Write-through</b></td><td>Write to cache AND DB simultaneously on every write</td><td>Read-heavy, data consistency critical</td><td>Write latency doubled; cached data may never be read</td></tr>
+      <tr><td><b style="color:var(--accent)">Write-back</b><br><span style="font-size:11px;color:var(--muted)">(Write-behind)</span></td><td>Write to cache → acknowledge → async flush to DB</td><td>Write-heavy workloads, IoT sensors</td><td>Data loss risk if cache crashes before flush</td></tr>
+      <tr><td><b style="color:var(--accent)">Write-around</b></td><td>Write directly to DB, bypass cache entirely</td><td>Data written once, rarely read (logs, cold data)</td><td>Cache miss on first read after write</td></tr>
+      <tr><td><b style="color:var(--accent)">Read-through</b></td><td>Cache sits in front of DB; cache auto-populates on miss</td><td>Consistent read path; library handles cache logic</td><td>First request always slow; cache provider needed</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div style="margin-top:14px;padding:12px 16px;background:rgba(251,191,36,.06);border-radius:8px;border-left:3px solid var(--warn);font-size:13px;color:var(--muted2)">
+    <b style="color:var(--warn)">Eviction Policies:</b> LRU (least recently used — most common), LFU (least frequently used — better for popularity-based), TTL (time-to-live — simple, use for session data), FIFO (first in first out — rare).
+  </div>
+</div>
+
+<!-- Section 7: CAP Theorem -->
+<div class="cs-section">
+  <h3>7 — CAP Theorem</h3>
+  <div class="grid-3">
+    <div class="cap-box">
+      <h4 style="color:var(--accent)">CP Systems</h4>
+      <p>Consistent + Partition Tolerant. Sacrifices availability — returns error rather than stale data.</p>
+      <div class="examples">
+        <span>MongoDB</span><span>HBase</span><span>ZooKeeper</span><span>Redis (single)</span><span>Etcd</span>
+      </div>
+      <p style="margin-top:10px;font-size:11px;color:var(--muted)">Use when: banking, distributed locks, config management</p>
+    </div>
+    <div class="cap-box">
+      <h4 style="color:var(--hld)">AP Systems</h4>
+      <p>Available + Partition Tolerant. Sacrifices consistency — returns potentially stale data.</p>
+      <div class="examples">
+        <span>Cassandra</span><span>DynamoDB</span><span>CouchDB</span><span>DNS</span><span>Riak</span>
+      </div>
+      <p style="margin-top:10px;font-size:11px;color:var(--muted)">Use when: social feeds, shopping carts, user profiles</p>
+    </div>
+    <div class="cap-box">
+      <h4 style="color:var(--warn)">CA Systems</h4>
+      <p>Consistent + Available. Only possible without partitions — only works on single node.</p>
+      <div class="examples">
+        <span>MySQL (single)</span><span>PostgreSQL (single)</span><span>SQLite</span>
+      </div>
+      <p style="margin-top:10px;font-size:11px;color:var(--muted)">Reality: P always happens in distributed systems — CA is theoretical</p>
+    </div>
+  </div>
+  <div style="margin-top:14px;padding:12px 16px;background:rgba(129,140,248,.06);border-radius:8px;border-left:3px solid var(--accent);font-size:13px;color:var(--muted2)">
+    <b style="color:var(--accent)">PACELC extension:</b> Even without partition, there is latency vs consistency tradeoff. DynamoDB is PA/EL (choose low latency). Spanner is PC/EC (always consistent, accepts latency).
+  </div>
+</div>
+
+<!-- Section 8: Load Balancing Algorithms -->
+<div class="cs-section">
+  <h3>8 — Load Balancing Algorithms</h3>
+  <div class="card" style="padding:0;overflow:hidden">
+  <table class="cs-table">
+    <thead><tr><th>Algorithm</th><th>How it Works</th><th>Best For</th></tr></thead>
+    <tbody>
+      <tr><td><b>Round Robin</b></td><td>Cycle through servers in order sequentially</td><td>Homogeneous servers, stateless apps</td></tr>
+      <tr><td><b>Weighted Round Robin</b></td><td>Higher-capacity servers get more requests proportionally</td><td>Heterogeneous server fleet</td></tr>
+      <tr><td><b>Least Connections</b></td><td>Route to server with fewest active connections</td><td>Variable-length requests, long-lived connections</td></tr>
+      <tr><td><b>Least Response Time</b></td><td>Route to server with lowest latency + fewest connections</td><td>Performance-sensitive APIs</td></tr>
+      <tr><td><b>IP Hash</b></td><td>Hash client IP → deterministic server assignment</td><td>Sticky sessions without session store</td></tr>
+      <tr><td><b>Consistent Hashing</b></td><td>Hash request attribute to ring; nearest server clockwise</td><td>Cache clusters — minimize remapping on scale</td></tr>
+      <tr><td><b>Random</b></td><td>Pick a random server for each request</td><td>Simple, works well statistically at scale</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- Section 9: HLD Problem Templates -->
+<div class="cs-section">
+  <h3>9 — HLD Problem Interview Framework</h3>
+  <pre class="code">╔══════════════════════════════════════════════════════════════════════╗
+║  SYSTEM DESIGN INTERVIEW FRAMEWORK (40-45 minutes)                   ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+STEP 1 — Clarify Requirements (5 min)
+  Functional:
+    • What are the core features? (create, read, update, delete?)
+    • What are edge cases? (deletions? soft delete? archival?)
+    • Who are the users? (consumers, businesses, internal?)
+  Non-Functional:
+    • Scale: DAU, RPS, read:write ratio
+    • Latency: p99 acceptable latency?
+    • Consistency vs Availability tradeoff?
+    • Durability: can we lose data?
+
+STEP 2 — Estimate Scale (3 min)
+  • DAU = 100M users
+  • Reads: 100M × 10 reads/day = 1000M reads/day ≈ 12K RPS
+  • Writes: 100M × 1 write/day = 100M writes/day ≈ 1.2K RPS
+  • Storage: 1.2K writes/sec × 1KB = 1.2 GB/day ≈ 440 GB/year
+
+STEP 3 — High-Level Design (10 min)
+  Client → Load Balancer → App Servers → Cache → DB
+  • Draw boxes and arrows
+  • Identify: API layer, service layer, data layer
+  • Show CDN for static assets, message queue if async
+
+STEP 4 — Deep Dive (15 min)
+  DB Schema:
+    users(id, username, email, created_at)
+    posts(id, user_id, content, media_url, created_at)
+
+  API Design:
+    POST   /api/v1/posts          → create post
+    GET    /api/v1/feed?cursor=X  → paginated feed
+    DELETE /api/v1/posts/{id}     → delete post
+
+  Key Design Decisions:
+    • Indexing strategy (which columns?)
+    • Caching strategy (cache-aside? TTL?)
+    • Sharding key (user_id? time?)
+
+STEP 5 — Identify Bottlenecks + Solutions (7 min)
+  Hot Spots:
+    • DB write bottleneck → read replicas + caching
+    • Single point of failure → redundancy + health checks
+    • Storage limits → cold storage tiering (S3 + Glacier)
+  Monitoring:
+    • Latency p50/p99, error rate, throughput
+    • Alerts: > 1% error rate, > 500ms p99 latency</pre>
+</div>
+
+<!-- Section 10: Top Interview Questions -->
+<div class="cs-section">
+  <h3>10 — SDE-3 Top Interview Questions</h3>
+  <div class="grid-2">
+    <div class="card">
+      <div style="font-size:14px;font-weight:700;color:var(--lld);margin-bottom:14px">LLD Questions (10)</div>
+      <ol style="padding-left:18px;display:flex;flex-direction:column;gap:10px">
+        <li style="font-size:13px;color:var(--text)"><b>Parking Lot System</b> — Multiple floors, types of vehicles, payment</li>
+        <li style="font-size:13px;color:var(--text)"><b>Library Management</b> — Books, members, reservation, fines</li>
+        <li style="font-size:13px;color:var(--text)"><b>Elevator System</b> — Multiple cars, SCAN algorithm, state machine</li>
+        <li style="font-size:13px;color:var(--text)"><b>ATM Machine</b> — Card auth, balance check, dispense, audit log</li>
+        <li style="font-size:13px;color:var(--text)"><b>Chess Game</b> — Pieces, board, move validation, check/checkmate</li>
+        <li style="font-size:13px;color:var(--text)"><b>Hotel Booking</b> — Room types, availability, reservation, cancellation</li>
+        <li style="font-size:13px;color:var(--text)"><b>Snake & Ladder</b> — Board, players, dice, game state</li>
+        <li style="font-size:13px;color:var(--text)"><b>Food Delivery App</b> — Restaurants, menu, order, delivery tracking</li>
+        <li style="font-size:13px;color:var(--text)"><b>Vending Machine</b> — Items, inventory, payment, state machine</li>
+        <li style="font-size:13px;color:var(--text)"><b>Ride-sharing (Ola/Uber)</b> — Driver matching, trip, fare calculation</li>
+      </ol>
+    </div>
+    <div class="card">
+      <div style="font-size:14px;font-weight:700;color:var(--hld);margin-bottom:14px">HLD Questions (10)</div>
+      <ol style="padding-left:18px;display:flex;flex-direction:column;gap:10px">
+        <li style="font-size:13px;color:var(--text)"><b>URL Shortener</b> — Base62, collision handling, analytics, scale</li>
+        <li style="font-size:13px;color:var(--text)"><b>Rate Limiter</b> — Token bucket, distributed, Redis atomic ops</li>
+        <li style="font-size:13px;color:var(--text)"><b>News Feed (Twitter/Instagram)</b> — Fan-out, celebrity problem, ranking</li>
+        <li style="font-size:13px;color:var(--text)"><b>WhatsApp Messaging</b> — Delivery receipts, E2E encryption, group chat</li>
+        <li style="font-size:13px;color:var(--text)"><b>YouTube / Video Streaming</b> — CDN, adaptive bitrate, storage, transcoding</li>
+        <li style="font-size:13px;color:var(--text)"><b>Uber / Ride Matching</b> — Geo-indexing, driver matching, surge pricing</li>
+        <li style="font-size:13px;color:var(--text)"><b>Google Drive / Dropbox</b> — Chunking, dedup, sync protocol</li>
+        <li style="font-size:13px;color:var(--text)"><b>Search Autocomplete</b> — Trie, top-K, personalization, CDN</li>
+        <li style="font-size:13px;color:var(--text)"><b>Distributed Cache (Redis)</b> — Consistent hashing, eviction, replication</li>
+        <li style="font-size:13px;color:var(--text)"><b>Notification System</b> — Push/email/SMS, fan-out, deduplication</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px;background:linear-gradient(135deg,rgba(129,140,248,.08),rgba(52,211,153,.04));border-color:rgba(129,140,248,.2)">
+    <div style="font-size:14px;font-weight:700;margin-bottom:12px">SDE-3 Interview Tips</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div style="font-size:13px;color:var(--muted2);line-height:1.7">
+        ✦ Always clarify before designing — interviewers reward good questions<br>
+        ✦ State assumptions explicitly: "I'll assume 100M DAU"<br>
+        ✦ Think aloud — interviewers want to hear your reasoning process<br>
+        ✦ Discuss trade-offs — never present one option without alternatives
+      </div>
+      <div style="font-size:13px;color:var(--muted2);line-height:1.7">
+        ✦ Mention monitoring, alerting, and observability<br>
+        ✦ Propose phased rollout: start simple → scale as needed<br>
+        ✦ Know failure modes: what breaks first? how do we recover?<br>
+        ✦ For SDE-3: ownership mindset — "how would we maintain this at 3am?"
+      </div>
+    </div>
+  </div>
+</div>
+  `;
+}
+
+// ══════════════════════════════════════════════════════════════
+// BACKUP
+// ══════════════════════════════════════════════════════════════
+function renderBackup() {
+  const boxes = document.getElementById('backupInfoBoxes');
+  boxes.innerHTML = `
+    <div class="bk-info-box">
+      <div class="lbl">Topics Studied</div>
+      <div class="val" style="font-size:22px;font-weight:700;color:var(--hld)">${state.studied.length} / ${TOPICS.length}</div>
+    </div>
+    <div class="bk-info-box">
+      <div class="lbl">Last Export</div>
+      <div class="val">${state.lastExport ? new Date(state.lastExport).toLocaleString() : 'Never'}</div>
+    </div>
+    <div class="bk-info-box">
+      <div class="lbl">Last Import</div>
+      <div class="val">${state.lastImport ? new Date(state.lastImport).toLocaleString() : 'Never'}</div>
+    </div>
+  `;
+}
+
+function exportData() {
+  state.lastExport = new Date().toISOString();
+  saveState();
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const d = todayStr();
+  a.href = url; a.download = `sd-progress-${d}.json`;
+  a.click(); URL.revokeObjectURL(url);
+  showToast('✅ Progress exported!');
+  renderBackup();
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      state = { ...loadState(), ...imported, lastImport: new Date().toISOString() };
+      saveState();
+      updateStreakPill();
+      renderDashboard();
+      renderBackup();
+      showToast('✅ Progress imported!');
+    } catch (err) {
+      showToast('❌ Invalid backup file');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function freshStart() {
+  if (!confirm('Are you sure? This will clear ALL your SD prep progress. This cannot be undone.')) return;
+  localStorage.removeItem(STORE_KEY);
+  state = loadState();
+  updateStreakPill();
+  renderDashboard();
+  renderBackup();
+  showToast('🗑 Progress cleared — fresh start!');
+  document.getElementById('onboard').style.display = 'flex';
+}
+
+// ══════════════════════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════════════════════
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ══════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════
+function init() {
+  updateStreakPill();
+  renderDashboard();
+  checkOnboard();
+}
+
+init();
+</script>
+</body>
+</html>
