@@ -573,7 +573,9 @@ let currentPracticeQ = null;
 // STREAK
 // ═══════════════════════════════════════════════════════════
 function todayStr() {
-  return new Date().toISOString().split('T')[0];
+  const d = new Date();
+  // Use LOCAL date (not UTC) — avoids timezone issues for IST/non-UTC users
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
 function updateStreak() {
@@ -626,8 +628,7 @@ function getDayIndex() {
 
 // How far you are in the journey — advances if you solve ahead of schedule
 function getEffectiveDayIndex() {
-  const calIdx = getDayIndex();
-  if (calIdx < 0) return -1;
+  const calIdx = getDayIndex(); // -1 if no start date or timezone mismatch
   // Count consecutive completed days from day 0
   let consec = 0;
   for (let i = 0; i < 60; i++) {
@@ -635,7 +636,9 @@ function getEffectiveDayIndex() {
     if (probIds.length === 0 || probIds.every(id => isSolved(id))) consec = i + 1;
     else break;
   }
-  // Effective = max of calendar position or solved-ahead progress
+  // If start date missing or timezone caused negative calIdx,
+  // still show progress based on solved problems so "Day of Journey" is never blank
+  if (calIdx < 0) return consec > 0 ? Math.min(consec, 59) : -1;
   return Math.min(Math.max(calIdx, consec), 59);
 }
 
