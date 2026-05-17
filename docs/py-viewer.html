@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python · DSA Prep</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/eclipse.min.css">
+<style>
+:root {
+  --chrome: #3c3c3c;
+  --chrome2: #252526;
+  --editor-bg: #1e1e1e;
+  --editor-fg: #d4d4d4;
+  --out-bg: #181818;
+  --out-fg: #d4d4d4;
+  --accent-bar: #0078d4;
+  --border: #474747;
+  --text-dim: #cccccc;
+  --toolbar-pad: 14px 20px;
+  --run-bg: #0e639c;
+  --run-hover: #1177bb;
+}
+[data-theme="light"] {
+  --chrome: #f3f3f3;
+  --chrome2: #ececec;
+  --editor-bg: #ffffff;
+  --editor-fg: #24292f;
+  --out-bg: #f6f8fa;
+  --out-fg: #24292f;
+  --accent-bar: #0078d4;
+  --border: #e5e5e5;
+  --text-dim: #333333;
+  --run-bg: #0969da;
+  --run-hover: #0550ae;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--chrome2);color:var(--text-dim);min-height:100vh}
+
+.titlebar{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:var(--toolbar-pad);
+  background:var(--chrome);
+  border-bottom:1px solid var(--border);
+}
+.titlebar a{
+  font-size:13px;font-weight:600;color:var(--text-dim);text-decoration:none;
+  padding:6px 12px;border-radius:6px;border:1px solid var(--border);opacity:.9;
+}
+.titlebar a:hover{opacity:1;border-color:var(--accent-bar)}
+.titlebar .grow{flex:1;min-width:0}
+.problem-name{font-size:13px;font-weight:600;color:var(--text-dim);opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#themeBtn{
+  background:transparent;border:1px solid var(--border);border-radius:6px;
+  padding:6px 12px;cursor:pointer;font-size:15px;color:inherit;
+}
+
+.editor-tab-row{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  padding:6px 0 10px;margin-bottom:2px;border-bottom:1px solid var(--border);
+  background:var(--chrome2);
+}
+.editor-tab-row .file-tab{
+  flex:1;min-width:0;
+  font-family:'JetBrains Mono',monospace;font-size:12px;padding:8px 14px 8px 12px;
+  background:var(--editor-bg);color:var(--text-dim);border:1px solid var(--border);
+  border-bottom:2px solid var(--accent-bar);border-radius:6px 6px 0 0;
+  display:flex;align-items:center;gap:8px;
+  max-width:min(560px, calc(100vw - 240px));overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.editor-tab-row .file-tab::before{
+  content:'🐍';flex-shrink:0;font-size:14px;opacity:.85;
+}
+.editor-tab-actions{
+  display:flex;align-items:center;gap:8px;flex-shrink:0;
+}
+.btn-run{
+  font-size:12px;font-weight:600;padding:6px 14px;border:none;border-radius:6px;cursor:pointer;
+  background:var(--run-bg);color:#fff;display:inline-flex;align-items:center;gap:5px;
+}
+.btn-run:hover:not(:disabled){background:var(--run-hover)}
+.btn-run:disabled{opacity:.55;cursor:wait}
+.btn-tool{
+  font-size:12px;padding:6px 12px;border-radius:6px;cursor:pointer;
+  background:var(--editor-bg);color:var(--text-dim);border:1px solid var(--border);
+}
+.btn-tool:hover{background:rgba(128,128,128,.15)}
+.py-status{font-size:11px;color:#969696;max-width:160px;text-align:right;line-height:1.3}
+.py-status.loading{color:#3794ff}
+.py-status.err{color:#f14c4c}
+
+.shell{padding:0 0 32px}
+.editor-outer{margin:0 auto;max-width:1280px;padding:12px 20px 0}
+
+.editor-frame{
+  background:#252526;border:1px solid #3c3c3c;border-radius:8px;padding:10px 10px 12px;
+  box-shadow:0 16px 48px rgba(0,0,0,.35);
+}
+[data-theme="light"] .editor-frame{
+  background:#eaeaea;border-color:#ccc;box-shadow:0 4px 24px rgba(0,0,0,.07);
+}
+
+.editor-surface{
+  border:1px solid #1b1b1b;border-radius:6px;overflow:hidden;background:#1e1e1e;
+}
+[data-theme="light"] .editor-surface{
+  border-color:#d0d7de;background:#fff;
+}
+
+.editor-surface .CodeMirror{
+  height:min(58vh,680px);
+  font-family:'JetBrains Mono',monospace!important;
+  font-size:14px;line-height:1.5714;
+}
+.editor-surface .CodeMirror-scroll{padding:8px 0 20px}
+.editor-surface .CodeMirror-lines{padding:0 4px 0 8px}
+.editor-surface .CodeMirror-gutters{
+  background:#1e1e1e!important;border-right:1px solid #2b2b2b!important;padding-right:2px;
+}
+.editor-surface .CodeMirror-linenumber{
+  color:#858585!important;padding:0 14px 0 10px!important;min-width:2.5ch;
+}
+.editor-surface .CodeMirror-cursor{border-left:2px solid #aeafad!important}
+.editor-surface .CodeMirror-selected{background:rgba(38,79,120,.45)!important}
+.editor-surface .CodeMirror-focused .CodeMirror-selected{background:rgba(38,79,120,.55)!important}
+.cm-s-material-darker .CodeMirror-activeline-background{background:rgba(255,255,255,.04)!important}
+
+[data-theme="light"] .editor-surface .CodeMirror-gutters{
+  background:#f8f8f8!important;border-right-color:#e8e8e8!important;
+}
+[data-theme="light"] .editor-surface .CodeMirror-linenumber{color:#237893!important}
+[data-theme="light"] .cm-s-eclipse .CodeMirror-activeline-background{background:rgba(0,0,0,.04)!important}
+[data-theme="light"] .editor-surface .CodeMirror-focused .CodeMirror-selected{background:rgba(3,102,214,.22)!important}
+
+
+.output-wrap{margin-top:12px;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.output-head{
+  font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  padding:8px 14px;background:var(--chrome);color:var(--text-dim);border-bottom:1px solid var(--border);
+}
+.output-body{
+  margin:0;padding:14px 16px;min-height:100px;max-height:32vh;overflow:auto;
+  font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.55;
+  background:var(--out-bg);color:var(--out-fg);white-space:pre-wrap;word-break:break-word;
+}
+
+/* stdout / print colours */
+.ot-str{color:#ce9178}
+.ot-kw{color:#569cd6;font-weight:500}
+.ot-num{color:#b5cea8}
+.ot-key{color:#9cdcfe}
+.ot-dim{opacity:.65}
+
+[data-theme="light"] .ot-str{color:#0a3069}
+[data-theme="light"] .ot-kw{color:#0550ae;font-weight:600}
+[data-theme="light"] .ot-num{color:#116329}
+[data-theme="light"] .ot-key{color:#953800}
+
+/* traceback colours */
+.ot-trace{color:#dcdcaa}
+.ot-file{color:#4fc1ff}
+.ot-caret{color:#858585}
+.ot-errline{color:#f14c4c;font-weight:600}
+.ot-stderr-block{
+  display:block;margin-top:8px;padding:10px 12px;border-radius:8px;
+  border-left:3px solid #f14c4c;background:rgba(241,76,76,.09);
+}
+
+[data-theme="light"] .ot-trace{color:#953800}
+[data-theme="light"] .ot-file{color:#0969da}
+[data-theme="light"] .ot-stderr-block{background:rgba(207,34,46,.08);border-left-color:#cf222e}
+
+.state{text-align:center;padding:48px 24px;color:#969696}
+.state.err{color:#f14c4c}
+.spinner{
+  width:36px;height:36px;border:3px solid #474747;border-top-color:#0078d4;
+  border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.raw-row{text-align:center;padding:12px 20px;font-size:12px}
+.raw-row a{color:#569cd6;text-decoration:none}
+.raw-row a:hover{text-decoration:underline}
+[data-theme="light"] .raw-row a{color:#0969da}
+
+.hint-row{
+  font-size:11px;color:#969696;text-align:center;padding:8px 16px 0;line-height:1.5;max-width:720px;margin:0 auto;
+}
+[data-theme="light"] .hint-row{color:#64748b}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
+</head>
+<body>
+
+<header class="titlebar">
+  <a href="index.html">← DSA Prep</a>
+  <div class="grow">
+    <div class="problem-name" id="problemLine"></div>
+  </div>
+  <button type="button" id="themeBtn" title="Toggle theme">🌙</button>
+</header>
+
+<div class="shell">
+  <div class="editor-outer">
+    <div id="loading" class="state"><div class="spinner"></div>Loading source…</div>
+    <div id="error" class="state err" style="display:none"></div>
+    <div id="editorHost" style="display:none">
+      <div class="editor-tab-row">
+        <span class="file-tab" id="tabLabel" title="">solution.py</span>
+        <div class="editor-tab-actions">
+          <button type="button" class="btn-run" id="runBtn">▶ Run Python</button>
+          <button type="button" class="btn-tool" id="resetBtn" title="Restore loaded file">↺ Reset</button>
+          <span class="py-status" id="pyStatus"></span>
+        </div>
+      </div>
+      <div class="editor-frame">
+        <div class="editor-surface">
+          <textarea id="codeInput" spellcheck="false" wrap="off" autocapitalize="off" autocomplete="off"></textarea>
+        </div>
+      </div>
+      <div class="output-wrap">
+        <div class="output-head">Output / errors</div>
+        <div id="pyOutput" class="output-body"></div>
+      </div>
+      <p class="raw-row"><a id="rawLink" href="#" target="_blank" rel="noopener">Open raw file on GitHub</a></p>
+      <p class="hint-row">Runs locally in your browser with <b>Pyodide</b> (WebAssembly). The first run downloads Python (~10–25 MB). <code>input()</code> is not supported — use fixed test values instead.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const ALLOWED_HOST = 'raw.githubusercontent.com';
+  const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/kumarakshay2456/coding-interview-problems/master/';
+  const PATH_OK = /^[\w./-]+\.py$/i;
+  const PYODIDE_VERSION = '0.26.4';
+  const PYODIDE_BASE = 'https://cdn.jsdelivr.net/pyodide/v' + PYODIDE_VERSION + '/full/';
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function colorizePrintLineRaw(line) {
+    const re = /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')|(\bTrue\b|\bFalse\b|\bNone\b)|(\b\d+\.?\d*\b)/g;
+    let out = '';
+    let last = 0;
+    let m;
+    while ((m = re.exec(line)) !== null) {
+      out += escapeHtml(line.slice(last, m.index));
+      if (m[1]) out += '<span class="ot-str">' + escapeHtml(m[1]) + '</span>';
+      else if (m[2]) out += '<span class="ot-kw">' + escapeHtml(m[2]) + '</span>';
+      else if (m[3]) out += '<span class="ot-num">' + escapeHtml(m[3]) + '</span>';
+      last = re.lastIndex;
+    }
+    out += escapeHtml(line.slice(last));
+    return out;
+  }
+
+  function colorizePrintOutput(raw) {
+    if (!raw) return '';
+    return raw.split('\n').map(colorizePrintLineRaw).join('\n');
+  }
+
+  function colorizeTraceback(raw) {
+    if (!raw) return '';
+    return raw.split('\n').map(function (line) {
+      if (/^Traceback \(most recent call last\):/.test(line)) {
+        return '<span class="ot-trace">' + escapeHtml(line) + '</span>';
+      }
+      if (/^\s*File /.test(line)) {
+        return '<span class="ot-file">' + escapeHtml(line) + '</span>';
+      }
+      if (/^\s*\^+$/.test(line)) {
+        return '<span class="ot-caret">' + escapeHtml(line) + '</span>';
+      }
+      if (/^During handling of the above exception/.test(line)) {
+        return '<span class="ot-trace">' + escapeHtml(line) + '</span>';
+      }
+      if (/^[A-Za-z_][\w]*Error: /.test(line) || /^[A-Za-z_][\w]*Exception: /.test(line)) {
+        return '<span class="ot-errline">' + escapeHtml(line) + '</span>';
+      }
+      return colorizePrintLineRaw(line);
+    }).join('\n');
+  }
+
+  function renderOutput(stdout, stderr, jsErr) {
+    const el = document.getElementById('pyOutput');
+    let html = '';
+    if (stdout) {
+      html += colorizePrintOutput(stdout);
+    }
+    if (stderr) {
+      html += '<span class="ot-stderr-block">' + colorizeTraceback(stderr) + '</span>';
+    }
+    if (jsErr) {
+      const chunk = (stderr ? '\n' : '') + jsErr;
+      html += '<span class="ot-stderr-block">' + colorizeTraceback(chunk) + '</span>';
+    }
+    if (!html) {
+      html = '<span class="ot-dim">(no output — finished)</span>';
+    }
+    el.innerHTML = html;
+  }
+
+  function getQueryUrl() {
+    const p = new URLSearchParams(location.search).get('url');
+    if (!p) return null;
+    try {
+      const u = new URL(p);
+      if (u.protocol !== 'https:' || u.hostname !== ALLOWED_HOST) return null;
+      return u.href;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function getQueryPath() {
+    const p = new URLSearchParams(location.search).get('path');
+    if (!p) return null;
+    try {
+      const decoded = decodeURIComponent(p);
+      if (decoded.indexOf('..') !== -1 || !PATH_OK.test(decoded)) return null;
+      return decoded;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function localFileUrl(repoRelative) {
+    return new URL('../' + repoRelative, location.href).href;
+  }
+
+  let originalSource = '';
+  let cmInstance = null;
+
+  function cmTheme() {
+    return document.documentElement.getAttribute('data-theme') === 'light' ? 'eclipse' : 'material-darker';
+  }
+
+  function ensureCodeMirror() {
+    if (cmInstance || typeof CodeMirror === 'undefined') return cmInstance;
+    cmInstance = CodeMirror.fromTextArea(document.getElementById('codeInput'), {
+      mode: 'python',
+      theme: cmTheme(),
+      lineNumbers: true,
+      styleActiveLine: true,
+      indentUnit: 4,
+      indentWithTabs: false,
+      lineWrapping: false,
+      viewportMargin: 150,
+      cursorBlinkRate: 530,
+      extraKeys: {
+        Tab: function (cm) {
+          if (cm.somethingSelected()) {
+            CodeMirror.commands.indentMore(cm);
+          } else {
+            cm.replaceSelection('    ', 'end');
+          }
+        }
+      }
+    });
+    return cmInstance;
+  }
+
+  function getEditorValue() {
+    return cmInstance ? cmInstance.getValue() : document.getElementById('codeInput').value;
+  }
+
+  function setEditorValue(text) {
+    if (cmInstance) cmInstance.setValue(text);
+    else document.getElementById('codeInput').value = text;
+  }
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    document.getElementById('themeBtn').textContent = theme === 'light' ? '☀️' : '🌙';
+    if (cmInstance) {
+      cmInstance.setOption('theme', cmTheme());
+      cmInstance.refresh();
+    }
+  }
+
+  document.getElementById('themeBtn').onclick = function () {
+    const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    localStorage.setItem('dsa_theme', next);
+    applyTheme(next);
+  };
+
+  applyTheme(localStorage.getItem('dsa_theme') || 'dark');
+
+  const repoPath = getQueryPath();
+  const explicitUrl = getQueryUrl();
+  const loading = document.getElementById('loading');
+  const errEl = document.getElementById('error');
+  const editorHost = document.getElementById('editorHost');
+  const tabLabel = document.getElementById('tabLabel');
+  const rawLink = document.getElementById('rawLink');
+  const problemLine = document.getElementById('problemLine');
+  const runBtn = document.getElementById('runBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const pyStatus = document.getElementById('pyStatus');
+
+  function basename(p) {
+    const parts = p.split('/').filter(Boolean);
+    return parts.length ? parts[parts.length - 1] : 'solution.py';
+  }
+
+  if (!repoPath && !explicitUrl) {
+    loading.style.display = 'none';
+    errEl.style.display = 'block';
+    errEl.innerHTML = 'Missing <code>path</code> or <code>url</code>. Open a solution link from the <a href="index.html" style="color:#569cd6">DSA dashboard</a>.';
+    return;
+  }
+
+  const displayPath = repoPath || basename(new URL(explicitUrl).pathname);
+  tabLabel.textContent = displayPath;
+  tabLabel.setAttribute('title', displayPath);
+  document.title = basename(displayPath) + ' · DSA Prep';
+  problemLine.textContent = displayPath.includes('/')
+    ? displayPath.split('/').join(' › ')
+    : displayPath;
+
+  rawLink.href = repoPath ? GITHUB_RAW_BASE + repoPath : explicitUrl;
+
+  const tryUrls = [];
+  if (repoPath) {
+    tryUrls.push({ href: localFileUrl(repoPath), label: 'local' });
+    tryUrls.push({ href: GITHUB_RAW_BASE + repoPath, label: 'GitHub' });
+  }
+  if (explicitUrl) {
+    if (!tryUrls.some(function (x) { return x.href === explicitUrl; }))
+      tryUrls.push({ href: explicitUrl, label: 'GitHub' });
+  }
+
+  function setSource(text) {
+    originalSource = text;
+    setEditorValue(text);
+    renderOutput('', '', '');
+  }
+
+  let pyodidePromise = null;
+
+  function loadPyodideScript() {
+    return new Promise(function (resolve, reject) {
+      if (typeof loadPyodide !== 'undefined') {
+        resolve();
+        return;
+      }
+      const s = document.createElement('script');
+      s.src = PYODIDE_BASE + 'pyodide.js';
+      s.onload = function () { resolve(); };
+      s.onerror = function () { reject(new Error('Failed to load Pyodide')); };
+      document.head.appendChild(s);
+    });
+  }
+
+  function getPyodide() {
+    if (!pyodidePromise) {
+      pyodidePromise = (async function () {
+        await loadPyodideScript();
+        return loadPyodide({ indexURL: PYODIDE_BASE });
+      })();
+    }
+    return pyodidePromise;
+  }
+
+  runBtn.onclick = async function () {
+    const buffers = { stdout: '', stderr: '' };
+    document.getElementById('pyOutput').innerHTML = '';
+    runBtn.disabled = true;
+    pyStatus.textContent = 'Starting…';
+    pyStatus.className = 'py-status loading';
+    try {
+      const py = await getPyodide();
+      if (!py.__stdoutHooked) {
+        py.setStdout({
+          batched: function (s) {
+            py.__runBuffers.stdout += s;
+            renderOutput(py.__runBuffers.stdout, py.__runBuffers.stderr, '');
+          }
+        });
+        py.setStderr({
+          batched: function (s) {
+            py.__runBuffers.stderr += s;
+            renderOutput(py.__runBuffers.stdout, py.__runBuffers.stderr, '');
+          }
+        });
+        py.__stdoutHooked = true;
+      }
+      py.__runBuffers = buffers;
+      pyStatus.textContent = 'Running…';
+      await py.runPythonAsync(getEditorValue());
+      pyStatus.textContent = '';
+      pyStatus.className = 'py-status';
+      renderOutput(buffers.stdout, buffers.stderr, '');
+    } catch (e) {
+      pyStatus.textContent = '';
+      pyStatus.className = 'py-status';
+      const msg = e && (e.message || String(e));
+      renderOutput(buffers.stdout, buffers.stderr, msg);
+    } finally {
+      runBtn.disabled = false;
+    }
+  };
+
+  resetBtn.onclick = function () {
+    setEditorValue(originalSource);
+    renderOutput('', '', '');
+    pyStatus.textContent = '';
+    pyStatus.className = 'py-status';
+  };
+
+  function tryLoad(i) {
+    if (i >= tryUrls.length) {
+      loading.style.display = 'none';
+      errEl.style.display = 'block';
+      errEl.innerHTML =
+        '<b>Could not load this file.</b><p style="margin-top:12px;max-width:520px;margin-left:auto;margin-right:auto;line-height:1.6">' +
+        'Serve the repo from its root (folder that contains <code>docs</code> and <code>arrays</code>), then open ' +
+        '<code>http://localhost:PORT/docs/index.html</code>. ' +
+        'If you see a bare “404 File not found” page, fix the URL path (use <code>/docs/py-viewer.html</code> when the server root is the repo).</p>';
+      return;
+    }
+    fetch(tryUrls[i].href)
+      .then(function (r) {
+        if (!r.ok) throw new Error(String(r.status));
+        return r.text();
+      })
+      .then(function (text) {
+        loading.style.display = 'none';
+        editorHost.style.display = 'block';
+        ensureCodeMirror();
+        setSource(text);
+        cmInstance.refresh();
+      })
+      .catch(function () {
+        tryLoad(i + 1);
+      });
+  }
+
+  tryLoad(0);
+})();
+</script>
+</body>
+</html>

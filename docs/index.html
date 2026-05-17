@@ -556,6 +556,10 @@ const PROBLEMS = [
   });
 })();
 
+function codeViewerUrl(relPath) {
+  return 'py-viewer.html?path=' + encodeURIComponent(relPath);
+}
+
 const PATTERNS = [...new Set(PROBLEMS.map(p=>p.pattern))];
 
 // 60-DAY SCHEDULE
@@ -973,7 +977,7 @@ function renderDashboard() {
             <div class="chk ${isSolved(p.id)?'done':''}" onclick="toggleSolved('${p.id}','dashboard')"></div>
             <div class="prob-name ${isSolved(p.id)?'done':''}" style="flex:1;min-width:0">${p.name}</div>
             ${diffBadge(p.difficulty)}
-            ${p.file ? `<a class="prob-file" href="https://raw.githubusercontent.com/kumarakshay2456/coding-interview-problems/master/${p.file}" target="_blank" rel="noopener">📄 ${p.file}</a>` : ''}
+            ${p.file ? `<a class="prob-file" href="${codeViewerUrl(p.file)}" target="_blank" rel="noopener">📄 ${p.file}</a>` : ''}
             <button class="btn-chatgpt" onclick="openInChatGPT('${p.id}')">${GPT_SVG} Ask GPT</button>
             <span class="prob-chevron" title="Problem & examples">▸</span>
           </div>
@@ -1081,7 +1085,7 @@ function showDayDetail(idx) {
             <div style="font-size:11px;color:var(--muted);margin-top:2px">${p.time} · ${p.space}</div>
           </div>
           ${diffBadge(p.difficulty)}
-          ${p.file?`<a class="prob-file" href="https://raw.githubusercontent.com/kumarakshay2456/coding-interview-problems/master/${p.file}" target="_blank" rel="noopener">📄 ${p.file}</a>`:''}
+          ${p.file?`<a class="prob-file" href="${codeViewerUrl(p.file)}" target="_blank" rel="noopener">📄 ${p.file}</a>`:''}
           <button class="btn-chatgpt" onclick="openInChatGPT('${p.id}')">${GPT_SVG} Ask GPT</button>
           <span class="prob-chevron" title="Problem & examples">▸</span>
         </div>
@@ -1170,7 +1174,7 @@ function showQuestion(prob) {
         <span>💾 ${prob.space}</span>
         <span>${prob.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</span>
       </div>
-      ${prob.file ? `<a href="https://raw.githubusercontent.com/kumarakshay2456/coding-interview-problems/master/${prob.file}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-family:'JetBrains Mono',monospace;margin-bottom:16px;padding:8px 12px;background:rgba(129,140,248,.07);border:1px solid rgba(129,140,248,.2);border-radius:6px;color:var(--accent);text-decoration:none" onmouseover="this.style.background='rgba(129,140,248,.14)'" onmouseout="this.style.background='rgba(129,140,248,.07)'">📄 ${prob.file} <span style="font-size:10px;opacity:.6">↗</span></a>` : ''}
+      ${prob.file ? `<a href="${codeViewerUrl(prob.file)}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-family:'JetBrains Mono',monospace;margin-bottom:16px;padding:8px 12px;background:rgba(129,140,248,.07);border:1px solid rgba(129,140,248,.2);border-radius:6px;color:var(--accent);text-decoration:none" onmouseover="this.style.background='rgba(129,140,248,.14)'" onmouseout="this.style.background='rgba(129,140,248,.07)'">📄 ${prob.file} <span style="font-size:10px;opacity:.6">↗</span></a>` : ''}
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px">
         <button class="btn btn-ghost" onclick="toggleReveal('hint-box')">💡 Reveal Hint</button>
         <button class="btn btn-ghost" onclick="toggleReveal('approach-box')">🧠 Reveal Approach</button>
@@ -1251,7 +1255,7 @@ function renderProblems() {
                   <div style="font-size:11px;color:var(--muted);margin-top:2px">${p.time} · ${p.space} · ${p.tags.join(', ')}</div>
                 </div>
                 ${diffBadge(p.difficulty)}
-                ${p.file ? `<a class="prob-file" href="https://raw.githubusercontent.com/kumarakshay2456/coding-interview-problems/master/${p.file}" target="_blank" rel="noopener">📄 ${p.file} ↗</a>` : '<span style="font-size:11px;color:var(--muted)">—</span>'}
+                ${p.file ? `<a class="prob-file" href="${codeViewerUrl(p.file)}" target="_blank" rel="noopener">📄 ${p.file} ↗</a>` : '<span style="font-size:11px;color:var(--muted)">—</span>'}
                 <button class="btn-chatgpt" onclick="openInChatGPT('${p.id}')">${GPT_SVG} GPT</button>
                 <span class="prob-chevron" title="Problem & examples">▸</span>
               </div>
