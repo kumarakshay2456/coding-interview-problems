@@ -496,6 +496,10 @@ const TOPICS = [
    file:'interview_prep/hld/week4/day25_revision.md'},
 ];
 
+function mdViewerUrl(repoPath) {
+  return 'md-viewer.html?path=' + encodeURIComponent(repoPath);
+}
+
 // 25-day schedule
 const SCHEDULE = [
   [1,'OOP Basics — 4 Pillars','LLD',['lld1'],'Focus on the 4 pillars with Python examples. Write a mini class hierarchy: Shape → Circle/Rectangle with area() and perimeter(). Practice encapsulation with @property.'],
@@ -766,7 +770,7 @@ function renderDashboard() {
             <div style="font-size:13px;font-weight:600;${isStudied(t.id)?'text-decoration:line-through;color:var(--muted)':''}">${t.name}</div>
             <div style="font-size:11px;color:var(--muted);margin-top:2px">${t.category}</div>
           </div>
-          ${t.file ? `<a class="prob-file" href="https://raw.githubusercontent.com/kumarakshay2456/coding-interview-problems/master/${t.file}" target="_blank" rel="noopener">↗ ${t.file.split('/').pop()}</a>` : ''}
+          ${t.file ? `<a class="prob-file" href="${mdViewerUrl(t.file)}" target="_blank" rel="noopener">↗ ${t.file.split('/').pop()}</a>` : ''}
           <button class="btn-chatgpt" onclick="openChatGPT('${t.id}')">✦ Ask GPT</button>
         </div>
       `).join('')}
@@ -893,7 +897,7 @@ function showDayDetail(idx) {
           <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px">${t.keyPoints.map(kp=>`<span class="kp">${kp}</span>`).join('')}</div>
         </div>
         <div style="display:flex;gap:6px;flex-shrink:0">
-          ${t.file ? `<a class="prob-file" href="https://raw.githubusercontent.com/kumarakshay2456/coding-interview-problems/master/${t.file}" target="_blank" rel="noopener">↗ File</a>` : ''}
+          ${t.file ? `<a class="prob-file" href="${mdViewerUrl(t.file)}" target="_blank" rel="noopener">↗ File</a>` : ''}
           <button class="btn-chatgpt" onclick="openChatGPT('${t.id}')">✦ GPT</button>
         </div>
       </div>
@@ -964,7 +968,7 @@ function renderTopicRow(t) {
     </div>
     <div style="display:flex;gap:6px;flex-direction:column;align-items:flex-end;flex-shrink:0">
       <button class="btn-reveal" onclick="toggleTheory('${t.id}')">💡 Theory</button>
-      ${t.file ? `<a class="prob-file" href="https://raw.githubusercontent.com/kumarakshay2456/coding-interview-problems/master/${t.file}" target="_blank" rel="noopener">↗ File</a>` : ''}
+      ${t.file ? `<a class="prob-file" href="${mdViewerUrl(t.file)}" target="_blank" rel="noopener">↗ File</a>` : ''}
       <button class="btn-chatgpt" onclick="openChatGPT('${t.id}')">✦ Ask GPT</button>
     </div>
   </div>`;
