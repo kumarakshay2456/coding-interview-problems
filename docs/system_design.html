@@ -223,6 +223,22 @@ pre.code{background:#0d1117;border:1px solid var(--border);border-radius:8px;pad
 .bk-info-box .lbl{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:6px}
 .bk-info-box .val{font-size:13px;color:var(--muted2)}
 
+/* INTERVIEW DRILLS */
+.drill-intro{background:linear-gradient(135deg,rgba(129,140,248,.14),rgba(52,211,153,.06));border:1px solid rgba(129,140,248,.28);border-radius:16px;padding:24px;margin-bottom:20px}
+.drill-intro h2{font-size:20px;margin-bottom:8px}.drill-intro p{font-size:13px;color:var(--muted2);max-width:850px;line-height:1.7}
+.drill-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.drill-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .2s,transform .2s}
+.drill-card:hover{border-color:rgba(129,140,248,.55);transform:translateY(-2px)}
+.drill-card summary{list-style:none;cursor:pointer;padding:18px;display:flex;align-items:flex-start;gap:12px}.drill-card summary::-webkit-details-marker{display:none}
+.drill-number{width:29px;height:29px;border-radius:9px;flex:none;background:rgba(129,140,248,.16);color:var(--accent);display:grid;place-items:center;font-size:12px;font-weight:800}
+.drill-question{font-size:14px;font-weight:700;line-height:1.45;flex:1}.drill-chevron{color:var(--muted);transition:transform .2s}.drill-card[open] .drill-chevron{transform:rotate(180deg)}
+.drill-body{border-top:1px solid var(--border);padding:18px}.drill-body p{font-size:13px;color:var(--muted2);line-height:1.7;margin-bottom:13px}
+.drill-label{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:15px 0 6px}.drill-label:first-child{margin-top:0}
+.drill-steps{display:grid;gap:8px;padding:0;margin:0;list-style:none}.drill-steps li{font-size:12px;color:var(--muted2);line-height:1.55;padding:9px 10px 9px 34px;border-radius:8px;background:rgba(255,255,255,.03);position:relative}.drill-steps li::before{content:counter(item);counter-increment:item;position:absolute;left:10px;top:9px;color:var(--success);font-weight:800}.drill-steps{counter-reset:item}
+.drill-example{font-size:12px;line-height:1.65;padding:12px;border-left:3px solid var(--success);background:rgba(52,211,153,.06);border-radius:0 8px 8px 0;color:var(--muted2)}
+.drill-pitfall{font-size:12px;line-height:1.6;padding:10px 12px;border-radius:8px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.18);color:var(--muted2)}
+@media(max-width:900px){.drill-grid{grid-template-columns:1fr}}
+
 /* MISC */
 .divider{height:1px;background:var(--border);margin:20px 0}
 .tag{display:inline-block;background:rgba(255,255,255,.07);color:var(--muted2);font-size:11px;padding:2px 8px;border-radius:100px;margin:2px}
@@ -271,6 +287,7 @@ pre.code{background:#0d1117;border:1px solid var(--border);border-radius:8px;pad
     <button class="nav-tab" onclick="goTab('schedule',this)">📅 <span class="label">Schedule</span></button>
     <button class="nav-tab" onclick="goTab('topics',this)">📚 <span class="label">Topics</span></button>
     <button class="nav-tab" onclick="goTab('cheatsheet',this)">📋 <span class="label">Cheat Sheet</span></button>
+    <button class="nav-tab" onclick="goTab('drills',this)">🎤 <span class="label">Interview Drills</span></button>
     <button class="nav-tab" onclick="goTab('backup',this)">💾 <span class="label">Backup</span></button>
   </div>
   <div class="streak-pill" id="streakPill">🔥 0 days</div>
@@ -331,6 +348,105 @@ pre.code{background:#0d1117;border:1px solid var(--border);border-radius:8px;pad
   <div class="sec-title">System Design Cheat Sheet</div>
   <div class="sec-sub">All the concepts you need for LLD + HLD interviews in one place. Keep this open during mock sessions.</div>
   <div id="cheatContent"></div>
+</div>
+
+<!-- ═══════════════════════════ INTERVIEW DRILLS ═══════════════════════════ -->
+<div class="tab" id="tab-drills">
+  <div class="drill-intro">
+    <span class="badge b-hld">MOST ASKED</span>
+    <h2>System Design Reasoning Drills</h2>
+    <p>Practice saying the answer aloud: state the failure mode, choose the smallest reliable mechanism, name the trade-off, then ground it in a product example. Open a card to rehearse an interview-ready response.</p>
+  </div>
+
+  <div class="drill-grid">
+    <details class="drill-card" open>
+      <summary><span class="drill-number">01</span><span class="drill-question">A downstream microservice is slow or unavailable. How do you keep one failure from taking down the whole request?</span><span class="drill-chevron">⌄</span></summary>
+      <div class="drill-body">
+        <div class="drill-label">What the interviewer is testing</div><p>Whether you can prevent cascading failures—not just add retries.</p>
+        <div class="drill-label">Interview answer flow</div>
+        <ol class="drill-steps"><li>Set a short, explicit timeout and propagate a deadline; never wait forever.</li><li>Retry only transient, idempotent operations with exponential backoff and jitter.</li><li>Open a circuit breaker after repeated failures so calls fail fast while the dependency recovers.</li><li>Use a fallback: cached data, a degraded response, or an asynchronous queue when the user need not wait.</li><li>Monitor timeout rate, circuit state, saturation, and the dependency’s latency percentile.</li></ol>
+        <div class="drill-label">Real-world example</div><div class="drill-example">On a product-details page, the recommendations service times out. Return the page with cached recommendations or no recommendations—not a 500. For order creation, persist the order first and queue the email/analytics work instead of making the customer wait.</div>
+        <div class="drill-label">Pitfall to avoid</div><div class="drill-pitfall">Blind retries amplify an outage. Retry budgets and jitter keep thousands of clients from retrying at the same moment.</div>
+      </div>
+    </details>
+
+    <details class="drill-card">
+      <summary><span class="drill-number">02</span><span class="drill-question">A client retries a payment request after a network timeout. How do you avoid charging the customer twice?</span><span class="drill-chevron">⌄</span></summary>
+      <div class="drill-body">
+        <div class="drill-label">What the interviewer is testing</div><p>Idempotency, state modelling, and the difference between a request timing out and an operation failing.</p>
+        <div class="drill-label">Interview answer flow</div>
+        <ol class="drill-steps"><li>Require a client-generated idempotency key for every payment attempt.</li><li>Store the key, request fingerprint, and final result in the same durable transaction as the payment intent.</li><li>On a repeated key, return the original result instead of executing the charge again.</li><li>Use a payment state machine such as <code>pending → authorized → captured / failed</code>.</li><li>Reconcile asynchronously with the provider because a timeout can mean “unknown,” not “failed.”</li></ol>
+        <div class="drill-label">Real-world example</div><div class="drill-example">A mobile app loses connectivity after pressing Pay. The app safely sends the same idempotency key when it reconnects; the API returns the first charge result rather than creating a second payment.</div>
+        <div class="drill-label">Pitfall to avoid</div><div class="drill-pitfall">Do not call an external payment gateway inside an unbounded database transaction. Persist intent, call with an idempotency key, then reconcile the outcome.</div>
+      </div>
+    </details>
+
+    <details class="drill-card">
+      <summary><span class="drill-number">03</span><span class="drill-question">How would you coordinate an order, inventory reservation, and payment when each lives in a different service?</span><span class="drill-chevron">⌄</span></summary>
+      <div class="drill-body">
+        <div class="drill-label">What the interviewer is testing</div><p>How you manage distributed transactions without pretending a cross-service ACID transaction is free.</p>
+        <div class="drill-label">Interview answer flow</div>
+        <ol class="drill-steps"><li>Use a saga: each service performs a local transaction and emits an event.</li><li>Publish reliably with the transactional outbox pattern; a relay sends the saved event after commit.</li><li>Make consumers idempotent, because queues are commonly at-least-once delivery.</li><li>Define compensations: release inventory if payment fails; refund if a later step fails.</li><li>Give the user an explicit intermediate status such as <code>order pending</code>.</li></ol>
+        <div class="drill-label">Real-world example</div><div class="drill-example">For concert tickets, Inventory reserves seats for five minutes, Payment captures funds, then Order confirms. If payment fails, an event releases the seats; if confirmation is delayed, the user sees “processing” instead of an incorrect success message.</div>
+        <div class="drill-label">Pitfall to avoid</div><div class="drill-pitfall">Two-phase commit creates availability and operational risks across independently deployed services. Explain why a saga is usually the practical trade-off.</div>
+      </div>
+    </details>
+
+    <details class="drill-card">
+      <summary><span class="drill-number">04</span><span class="drill-question">A sudden traffic spike overwhelms a service. What do you do before scaling everything?</span><span class="drill-chevron">⌄</span></summary>
+      <div class="drill-body">
+        <div class="drill-label">What the interviewer is testing</div><p>Prioritization under load, backpressure, and protection of the most valuable path.</p>
+        <div class="drill-label">Interview answer flow</div>
+        <ol class="drill-steps"><li>Measure: inspect request rate, saturation, error rate, latency, and the hottest endpoint/key.</li><li>Rate-limit or shed low-priority traffic at the edge; preserve checkout and login over recommendations.</li><li>Cache safely and coalesce identical in-flight reads to prevent a cache stampede.</li><li>Queue asynchronous work, cap queue depth, and apply backpressure rather than accepting unlimited work.</li><li>Autoscale the stateless tier, then find the bottleneck in the database, connection pool, or downstream dependency.</li></ol>
+        <div class="drill-label">Real-world example</div><div class="drill-example">During a flash sale, serve catalog pages from CDN/cache, throttle refresh calls, and place order-confirmation emails on a queue. Never let email delivery consume the capacity needed to create an order.</div>
+        <div class="drill-label">Pitfall to avoid</div><div class="drill-pitfall">A queue is not infinite capacity. Its depth, consumer lag, and age must be observed; reject or delay work when the system cannot process it.</div>
+      </div>
+    </details>
+
+    <details class="drill-card">
+      <summary><span class="drill-number">05</span><span class="drill-question">How do you keep cache data correct enough while still getting low latency?</span><span class="drill-chevron">⌄</span></summary>
+      <div class="drill-body">
+        <div class="drill-label">What the interviewer is testing</div><p>Whether you recognize cache consistency as a product decision rather than a generic Redis answer.</p>
+        <div class="drill-label">Interview answer flow</div>
+        <ol class="drill-steps"><li>Classify the data: stale product images are acceptable; account balance and inventory may not be.</li><li>Use cache-aside for most reads: read cache, then database on a miss, then populate cache.</li><li>On writes, update the database first and invalidate or version the cache key.</li><li>Use TTLs, randomized expiry, request coalescing, and protection for hot keys.</li><li>For sensitive reads, bypass cache or use a short-lived/versioned entry after a write.</li></ol>
+        <div class="drill-label">Real-world example</div><div class="drill-example">A seller changes a product title. The write commits to PostgreSQL, then an event invalidates <code>product:123:v7</code>. Browsers may see the old title briefly, but the checkout re-reads inventory from the source of truth.</div>
+        <div class="drill-label">Pitfall to avoid</div><div class="drill-pitfall">Deleting a cache key before the database commit can expose stale values again. Define the write order and the acceptable staleness window.</div>
+      </div>
+    </details>
+
+    <details class="drill-card">
+      <summary><span class="drill-number">06</span><span class="drill-question">Your database is running out of capacity. How do you decide among indexes, replicas, partitioning, and sharding?</span><span class="drill-chevron">⌄</span></summary>
+      <div class="drill-body">
+        <div class="drill-label">What the interviewer is testing</div><p>Incremental thinking: solve the measured bottleneck before choosing the most complex architecture.</p>
+        <div class="drill-label">Interview answer flow</div>
+        <ol class="drill-steps"><li>Start with slow-query analysis, correct indexes, pagination, and connection-pool limits.</li><li>Use read replicas for read-heavy, replication-tolerant queries.</li><li>Partition a very large table by time or tenant when queries naturally prune partitions.</li><li>Shard only when one primary cannot handle write/storage load; choose a stable shard key and plan rebalancing.</li><li>Call out cross-shard queries, transactions, hotspots, and operational recovery as costs.</li></ol>
+        <div class="drill-label">Real-world example</div><div class="drill-example">An analytics-events table is partitioned by day, so a 7-day report reads only seven partitions. A global customer database may later shard by customer ID, while a celebrity tenant gets special treatment to avoid a hot shard.</div>
+        <div class="drill-label">Pitfall to avoid</div><div class="drill-pitfall">“Use sharding” without naming the shard key, rebalancing strategy, and cross-shard query plan is incomplete.</div>
+      </div>
+    </details>
+
+    <details class="drill-card">
+      <summary><span class="drill-number">07</span><span class="drill-question">A network partition occurs between two regions. Do you choose consistency or availability?</span><span class="drill-chevron">⌄</span></summary>
+      <div class="drill-body">
+        <div class="drill-label">What the interviewer is testing</div><p>Practical CAP reasoning: different operations can make different choices.</p>
+        <div class="drill-label">Interview answer flow</div>
+        <ol class="drill-steps"><li>Clarify the invariant: can users see stale data, or must they never double-spend?</li><li>For a money transfer, prefer consistency: reject or route to the quorum/primary when you cannot safely confirm state.</li><li>For a social feed, prefer availability: serve the last known content and reconcile later.</li><li>State the consistency model: strong, read-your-writes, eventual, or bounded staleness.</li><li>Explain recovery: conflict resolution, idempotent replay, and audit logs after the partition heals.</li></ol>
+        <div class="drill-label">Real-world example</div><div class="drill-example">A user’s profile photo can be eventually consistent across regions. A wallet balance should use a strongly consistent ledger or a single write region so the same funds are never spent twice.</div>
+        <div class="drill-label">Pitfall to avoid</div><div class="drill-pitfall">CAP is relevant during a partition. Do not say a system “chooses CA” while ignoring what happens when the network fails.</div>
+      </div>
+    </details>
+
+    <details class="drill-card">
+      <summary><span class="drill-number">08</span><span class="drill-question">What would you monitor so a team can find and recover from a production failure at 3 a.m.?</span><span class="drill-chevron">⌄</span></summary>
+      <div class="drill-body">
+        <div class="drill-label">What the interviewer is testing</div><p>Operational ownership after the system has been deployed.</p>
+        <div class="drill-label">Interview answer flow</div>
+        <ol class="drill-steps"><li>Define SLIs: successful request rate, p50/p95/p99 latency, availability, queue lag, and data freshness.</li><li>Set SLOs and alerts on user impact, not every CPU fluctuation.</li><li>Use structured logs with correlation IDs and distributed traces across services.</li><li>Build dashboards for saturation: CPU, memory, connection pools, disk, and consumer throughput.</li><li>Create a runbook: how to mitigate, roll back, and communicate status; test it with failure drills.</li></ol>
+        <div class="drill-label">Real-world example</div><div class="drill-example">A checkout trace carries one correlation ID from API gateway to inventory, payment, and order services. An alert shows rising payment timeouts and the runbook tells the on-call engineer to open the circuit and enable a known-safe fallback.</div>
+        <div class="drill-label">Pitfall to avoid</div><div class="drill-pitfall">Logs alone are not observability. Metrics show that something is wrong; traces help identify where; logs explain the individual failure.</div>
+      </div>
+    </details>
+  </div>
 </div>
 
 <!-- ══════════════════════════════ BACKUP ═══════════════════════════════════ -->
